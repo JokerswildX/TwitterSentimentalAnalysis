@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  div.wrapper
+    div.box.header Welcome to Twitter Sentiment Analysis
+    div.box.sidebar
+      div.sidebarContainer
+        div Select one of the option to view the distribution in map view:
+        div.comboBoxDiv
+          select.comboBox
+            option(value="happiness") Happiness
+            option(value="sad") Sad
+            option(value="worried") Worried
+            option(value="notSatisfied") Not Satisfied
+        div.buttonDiv
+          button(type="button" onclick='refreshContent()') Let's view it!
+    div.box.content
+      div.panel
+        div.panel-header
+          div.tabs
+            button(class="tablinks active" onclick="openTab(event,'MapView')") Map View
+            button(class="tablinks" onclick="openTab(event,'ChartAnalysisView')" ) Chart Analysis View
+        div.panel-body
+          div#MapView.tabcontent(style="display:block;")
+            h3 Map View
+            p Add map content here.
+          div#ChartAnalysisView.tabcontent
+            h3 Chart Analysis View
+            p Add chart analysis content here.
+

@@ -1,0 +1,106 @@
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.sidebar {
+  grid-area: sidebar;
+}
+
+.content {
+  grid-area: content;
+  position: relative;
+}
+
+.header {
+  grid-area: header;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 10px 0;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-rows: 50px auto;
+  grid-template-columns: 250px auto;
+  grid-template-areas:
+          "header  header"
+          "sidebar content";
+  height: 96vh;
+  background-color: #2196F3;
+  padding: 2px;
+}
+
+.box {
+  background-color: white;
+  margin:2px;
+}
+
+.sidebarContainer {
+  padding: 30px 5px 0 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.comboBoxDiv {
+  padding: 20px 5px 0 10px;
+
+}
+
+.comboBox {
+  width:200px;
+}
+
+.buttonDiv {
+  padding: 20px;
+  text-align: center;
+}
+
+.panel {
+  display: grid;
+  grid-template-rows: 20px auto;
+  height: 85vh;
+}
+
+.panel-body {
+  overflow: auto;
+}
+
+
+/** Tabs Module **/
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  cursor: pointer;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tabs button {
+.ellipsis;
+  background-color: lightskyblue;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 6px;
+  transition: 0.3s;
+  margin: 2px;
+}
+
+.tabs button:hover {
+  background-color: lightsteelblue;
+}
+
+/* Create an active/current tablink class */
+.tabs button.active {
+  background-color: steelblue;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
