@@ -104,3 +104,7 @@ body {
   border-top: none;
 }
 
+#mapid{
+  height: 500px;
+}
+
