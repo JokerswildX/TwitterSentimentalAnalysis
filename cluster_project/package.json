@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "watch": "nodemon server.js -e js,pug",
-    "start": "node server.js"
+    "watch": "nodemon app.js -e js,pug",
+    "start": "node app.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",

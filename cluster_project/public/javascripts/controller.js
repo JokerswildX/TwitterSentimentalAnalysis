@@ -2,7 +2,7 @@ function openTab(evt, name) {
     // Declare all variables
     var i, tabcontent, tablinks;
     var mymap = L.map('mapid').setView([-37.815,144.946], 13);
-
+    // var mymap = L.map('mapid').setView([39.74739, -105], 4);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
@@ -21,6 +21,95 @@ function openTab(evt, name) {
         "geometry":{ "type": "Polygon", "coordinates": [ [ [ 144.7, -37.5 ], [ 144.85, -37.5 ], [ 144.85, -37.65 ], [ 144.7, -37.65 ], [ 144.7, -37.5 ] ] ] }
 
     };
+
+    var geojsonFeature1 = {
+        "type": "Feature",
+        "properties": {
+            "name": "Melb Insta post",
+            "amenity": "Something",
+            "popupContent": "This is Abbotsford region!",
+            "color":"yellow"
+        },
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        144.889476128,
+                        -37.753934856
+                    ],
+                    [
+                        144.9073224,
+                        -37.755985044
+                    ],
+                    [
+                        144.90640512,
+                        -37.760597279
+                    ],
+                    [
+                        144.903815392,
+                        -37.759943045
+                    ],
+                    [
+                        144.905010016,
+                        -37.761700009
+                    ],
+                    [
+                        144.904835872,
+                        -37.762590506
+                    ],
+                    [
+                        144.903335808,
+                        -37.762409724
+                    ],
+                    [
+                        144.903231008,
+                        -37.762948999
+                    ],
+                    [
+                        144.903966816,
+                        -37.763380419
+                    ],
+                    [
+                        144.903563648,
+                        -37.764882545
+                    ],
+                    [
+                        144.902198176,
+                        -37.764734582
+                    ],
+                    [
+                        144.901579744,
+                        -37.765398473
+                    ],
+                    [
+                        144.89816928,
+                        -37.76465346
+                    ],
+                    [
+                        144.89371936,
+                        -37.765740482
+                    ],
+                    [
+                        144.888945408,
+                        -37.761904471
+                    ],
+                    [
+                        144.889965376,
+                        -37.756715035
+                    ],
+                    [
+                        144.889083712,
+                        -37.755558452
+                    ],
+                    [
+                        144.889476128,
+                        -37.753934856
+                    ]
+                ]
+            ]
+        }
+    }
     L.geoJSON(geojsonFeature, {
         style: function (feature) {
             return {color: feature.properties.color};
@@ -29,6 +118,7 @@ function openTab(evt, name) {
         return layer.feature.properties.popupContent;
     }).addTo(mymap);
 
+    L.geoJSON(geojsonFeature1).addTo(mymap);
     // L.geoJSON(geojsonFeature).addTo(mymap);
     // L.marker([-37.823, 144.950]).addTo(mymap)
     //     .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')

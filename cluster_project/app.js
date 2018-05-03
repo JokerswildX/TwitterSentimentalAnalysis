@@ -22,8 +22,10 @@ couchdb.db.list(function (error, body, headers) {
     // response.send(body, 200);
     console.log(body);
 });
+var insta;
 twitterdb.get('30fb7bc60bdf10e107ea16ba56003324', { revs_info: true }, function(err, body) {
     if (!err)
+        insta=body.rows;
         console.log(body.rows);
 });
 // view engine setup
@@ -38,11 +40,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
+app.use('/users/list_user',usersRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
+// app.get('/search',function(req,res){
+//     res.send('hello world');
+// });
 
 // error handler
 app.use(function(err, req, res, next) {
@@ -55,9 +61,13 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+app.get('/users/list_user', function (req, res) {
+    console.log("Got a GET request for /list_user");
+    res.send('Page Listing');
+});
+
 app.listen(3000, function (){
    console.log("Listening on http://localhost:3000");
 });
-
 
 module.exports = app;
