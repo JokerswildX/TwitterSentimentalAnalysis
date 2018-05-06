@@ -1,8 +1,7 @@
 function openTab(evt, name) {
     // Declare all variables
     var i, tabcontent, tablinks;
-    var mymap = L.map('mapid').setView([-37.815,144.946], 13);
-    // var mymap = L.map('mapid').setView([39.74739, -105], 4);
+    var mymap = L.map('mapid').setView([-37.815,144.946], 8);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
@@ -10,22 +9,7 @@ function openTab(evt, name) {
       accessToken: 'pk.eyJ1IjoibWFwYm94YW50OTIiLCJhIjoiY2pnbnNxMHM5MTg1cDMzcm05b3h5a3dyZCJ9.9RFYeawcSEckqpspzzhKxQ'
     }).addTo(mymap);
 
-    var geojsonFeature = {
-        "type": "Feature",
-        "properties": {
-            "name": "Melb Insta post",
-            "amenity": "Something",
-            "popupContent": "This is where an Instagram post came from!",
-            "color":"green"
-        },
-        "geometry":{ "type": "Polygon", "coordinates": [ [ [ 144.7, -37.5 ], [ 144.85, -37.5 ], [ 144.85, -37.65 ], [ 144.7, -37.65 ], [ 144.7, -37.5 ] ] ] }
-
-    };
-    var fr = new FileReader();
-    var blob = new Blob('public/javascripts/shapefiles.zip');
-    console.log(blob);
-    var buf = fr.readAsArrayBuffer('public/javascripts/shapefiles.zip');
-    var shpfile = new L.Shapefile(buf, {
+    var shpfile = new L.Shapefile('public/javascripts/Shapefile.zip', {
         onEachFeature: function(feature, layer) {
             if (feature.properties) {
                 layer.bindPopup(Object.keys(feature.properties).map(function(k) {
@@ -34,117 +18,99 @@ function openTab(evt, name) {
                     maxHeight: 200
                 });
             }
-        }
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight
+            });
+        },
+        style: style
     });
 
     shpfile.addTo(mymap);
-    // shp("public/javascripts/shapefiles.zip").then(function(geojson){
-    //     //do something with your geojson
-    //     console.log(geojson)
-    // });
 
-    // var geojsonFeature1 = {
-    //     "type": "Feature",
-    //     "properties": {
-    //         "name": "Melb Insta post",
-    //         "amenity": "Something",
-    //         "popupContent": "This is Abbotsford region!",
-    //         "color":"yellow"
-    //     },
-    //     "geometry": {
-    //         "type": "Polygon",
-    //         "coordinates": [
-    //             [
-    //                 [
-    //                     144.889476128,
-    //                     -37.753934856
-    //                 ],
-    //                 [
-    //                     144.9073224,
-    //                     -37.755985044
-    //                 ],
-    //                 [
-    //                     144.90640512,
-    //                     -37.760597279
-    //                 ],
-    //                 [
-    //                     144.903815392,
-    //                     -37.759943045
-    //                 ],
-    //                 [
-    //                     144.905010016,
-    //                     -37.761700009
-    //                 ],
-    //                 [
-    //                     144.904835872,
-    //                     -37.762590506
-    //                 ],
-    //                 [
-    //                     144.903335808,
-    //                     -37.762409724
-    //                 ],
-    //                 [
-    //                     144.903231008,
-    //                     -37.762948999
-    //                 ],
-    //                 [
-    //                     144.903966816,
-    //                     -37.763380419
-    //                 ],
-    //                 [
-    //                     144.903563648,
-    //                     -37.764882545
-    //                 ],
-    //                 [
-    //                     144.902198176,
-    //                     -37.764734582
-    //                 ],
-    //                 [
-    //                     144.901579744,
-    //                     -37.765398473
-    //                 ],
-    //                 [
-    //                     144.89816928,
-    //                     -37.76465346
-    //                 ],
-    //                 [
-    //                     144.89371936,
-    //                     -37.765740482
-    //                 ],
-    //                 [
-    //                     144.888945408,
-    //                     -37.761904471
-    //                 ],
-    //                 [
-    //                     144.889965376,
-    //                     -37.756715035
-    //                 ],
-    //                 [
-    //                     144.889083712,
-    //                     -37.755558452
-    //                 ],
-    //                 [
-    //                     144.889476128,
-    //                     -37.753934856
-    //                 ]
-    //             ]
-    //         ]
-    //     }
-    // }
-    L.geoJSON(geojsonFeature, {
-        style: function (feature) {
-            return {color: feature.properties.color};
+    function getColor(d) {
+        return d > 1000 ? '#7a0177' :
+            d > 500  ? '#ae017e' :
+            d > 200  ? '#dd3497' :
+            d > 100  ? '#f768a1' :
+            d > 50   ? '#fa9fb5' :
+            d > 20   ? '#fcc5c0' :
+            d > 10   ? '#fde0dd' :
+            '#fff7f3';
+    }
+
+    function style(feature) {
+        return {
+            fillColor: getColor(Math.floor(Math.random() * 1000) + 1),
+            weight: 1,
+            opacity: 1,
+            color: 'black',
+            dashArray: '3',
+            fillOpacity: 0.7
+        };
+    }
+
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 3,
+            color: 'black',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
         }
-    }).bindPopup(function (layer) {
-        return layer.feature.properties.popupContent;
-    }).addTo(mymap);
+        info.update(layer.feature.properties);
+    }
 
-    // L.geoJSON(geojsonFeature1).addTo(mymap);
-    // L.geoJSON(geojsonFeature).addTo(mymap);
-    // L.marker([-37.823, 144.950]).addTo(mymap)
-    //     .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-    //     .openPopup();
-    // Get all elements with class="tabcontent" and hide them
+    function resetHighlight(e) {
+        shpfile.resetStyle(e.target);
+        info.update();
+    }
+
+    var info = L.control();
+
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+        this.update();
+        return this._div;
+    };
+
+// method that we will use to update the control based on feature properties passed
+    info.update = function (props) {
+        this._div.innerHTML = '<h4>Name of the Suburb</h4>' +  (props ?
+            '<b>' + props.sa2_name16 + '</b><br />' + 'Happy people :-)'
+            : 'Hover over a suburb');
+    };
+
+    info.addTo(mymap);
+
+
+    var legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+            labels = [];
+
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+        }
+
+        return div;
+    };
+
+    legend.addTo(mymap);
+
+
+
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";

@@ -7,7 +7,10 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
+
 var app = express();
+
+app.use("/public", express.static(__dirname + "/public"));
 
 var couchdb = require('nano')('http://localhost:9000');
 var twitterdb = couchdb.db.use('raw_data');
@@ -26,7 +29,7 @@ var insta;
 twitterdb.get('493802764774825984', { revs_info: true }, function(err, body) {
     if (!err)
         insta=body.rows;
-        console.log(body.rows);
+        // console.log(body.rows);
 });
 // twitterdb.view('raw_data','get_text', function(err, body) {
 //     if (!err) {
