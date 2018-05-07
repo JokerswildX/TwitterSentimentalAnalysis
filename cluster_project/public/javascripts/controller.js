@@ -3,11 +3,20 @@ $(function () {
         openTab: function (view) {
             if (view == "mapView") {
                 // if(this.map === undefined) {
+                this.keymap={
+                    "tot_tot":"Total Income",
+                    "M0_tot_p_":"Number of Immigrants",
+                    "M0_prtc_t":"Percentage of family areas in suburb",
+                    "M0_hl_p_h":"Number of Homeless people",
+                    "M0_p_tot":"Total occupation",
+                    "sa2_name16":"Suburb"
+                };
                 var that = this;
                 this.shpfile;
                 this.map = this.openMapView();
                 $('#chartbutton').removeClass('active');
                 $('#mapbutton').addClass('active');
+                var key;
                 $.ajax({
                     type: "GET",
                     url: '/getSentiment',
@@ -18,8 +27,16 @@ $(function () {
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
                             onEachFeature: function (feature, layer) {
                                 if (feature.properties) {
+
                                     layer.bindPopup(Object.keys(feature.properties).map(function (k) {
-                                        return k + ": " + feature.properties[k];
+                                        if(isNaN(parseInt(k))){
+                                           key = k;
+                                        }else{
+                                           key = k.substring(parseInt(k).toString().length);
+                                        }
+                                        if(that.keymap[key] !== undefined) {
+                                            return that.keymap[key] + ": " + feature.properties[k];
+                                        }
                                     }).join("<br />"), {
                                         maxHeight: 200
                                     });
