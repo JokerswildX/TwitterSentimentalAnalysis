@@ -13,7 +13,6 @@ $(function () {
                     url: '/getSentiment',
                     contentType: 'application/json',
                     success: function (response) {
-                        console.log(response);
                         that.response = response;
                         that.info = L.control();
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
@@ -45,7 +44,6 @@ $(function () {
                                 };
                             }
                         });
-                        //
                         that.shpfile.addTo(that.map);
                         that.info.onAdd = function (map) {
                             this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
@@ -75,6 +73,10 @@ $(function () {
                                 layer.bringToFront();
                             }
                             that.info.update(layer.feature.properties);
+                            var popup = L.popup()
+                                .setLatLng(e.latlng)
+                                .setContent('Popup')
+                                .openOn(that.map);
                         }
 
                         function resetHighlight(e){
