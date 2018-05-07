@@ -14,8 +14,7 @@ $(function () {
                     contentType: 'application/json',
                     success: function (response) {
                         console.log(response);
-                        // blob = new Blob([response], {type: "octet/stream"});
-                        // var shpfile = new L.Shapefile(fr.readAsArrayBuffer(reponse), {
+                        that.response = response;
                         that.info = L.control();
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
                             onEachFeature: function (feature, layer) {
@@ -31,9 +30,13 @@ $(function () {
                                     mouseout: resetHighlight
                                 });
                             },
-                            style: function(){
+                            style: function(feature){
+                                if(feature.properties.sentimentDensity === undefined) {
+                                    feature.properties.sentimentDensity = that.getSentimentDensity(feature.properties.sa2_main16);
+                                }
+
                                 return {
-                                    fillColor: that.getColor(Math.floor(Math.random() * 1000) + 1),
+                                    fillColor: that.getColor(feature.properties.sentimentDensity),
                                     weight: 1,
                                     opacity: 1,
                                     color: 'black',
@@ -114,27 +117,27 @@ $(function () {
             // alert('hello');
         },
         getColor: function (d) {
-            return d > 1000 ? '#7a0177' :
-                d > 500 ? '#ae017e' :
-                    d > 200 ? '#dd3497' :
-                        d > 100 ? '#f768a1' :
-                            d > 50 ? '#fa9fb5' :
-                                d > 20 ? '#fcc5c0' :
-                                    d > 10 ? '#fde0dd' :
-                                        '#fff7f3';
+            return d > 0.75 ? '#587D0B' :
+                    d > 0.5 ? '#4EB60B' :
+                    d > 0.25 ? '#82BE0A' :
+                    d > 0 ? '#BAC608' :
+                    d > -0.25 ? '#CEA306' :
+                    d > -0.5 ? '#D67004' :
+                    d > -0.75 ? '#DE3602' :
+                    '#E60008';
         },
         addLegend: function(){
             var that = this;
             this.legend = L.control({position: 'bottomright'});
             this.legend.onAdd = function (map) {
                 var div = L.DomUtil.create('div', 'info legend'),
-                    grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                    grades = [-1, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1],
                     labels = [];
                 // loop through our density intervals and generate a label with a colored square for each interval
-                for (var i = 0; i < grades.length; i++) {
+                for (var i = 0; i < grades.length-1; i++) {
                     div.innerHTML +=
-                        '<i style="background:' + that.getColor(grades[i] + 1) + '"></i> ' +
-                        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                        '<i style="background:' + that.getColor(grades[i] + 0.01) + ' "></i> ' +
+                        grades[i] + ' - ' + grades[i + 1] + '<br>';
                 }
                 return div;
             };
@@ -143,6 +146,15 @@ $(function () {
         refreshContent: function(){
             var selectedContent = $('.comboBox').val();
             alert(selectedContent);
+        },
+        getSentimentDensity: function(suburbId) {
+            var sentimentDensity;
+            this.response.rows.forEach(function(doc) {
+                if(doc.key == suburbId) {
+                    sentimentDensity =doc.value.total/doc.value.count;
+                }
+            });
+            return sentimentDensity;
         }
     };
 
