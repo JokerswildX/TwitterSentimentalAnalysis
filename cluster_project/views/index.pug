@@ -18,13 +18,12 @@ block content
       div.panel
         div.panel-header
           div.tabs
-            button(class="tablinks active" onclick="openTab(event,'mapid')") Map View
-            button(class="tablinks" onclick="openTab(event,'ChartAnalysisView')" ) Chart Analysis View
+            button(class="tablinks active" onclick="openTab(event,'mapView')") Map View
+            button(class="tablinks" onclick="openTab(event,'chartAnalysisView')" ) Chart Analysis View
         div.panel-body
-          div#mapid.tabcontent(style="display:block;")
-            h3 Map View
-            p Add map content here.
-          div#ChartAnalysisView.tabcontent
+          div#mapView.tabcontent(style="display:block;")
+            div#mapid
+          div#chartAnalysisView.tabcontent
             h3 Chart Analysis View
             p Add chart analysis content here.
 
