@@ -25,7 +25,7 @@ var insta;
 //     }
 // });
 app.get('/getSentiment',function(req,res){
-    twitterdb.view('data','get_sentiment',function(err,body){
+    twitterdb.view('data','get_sentiment',{group:"true"},function(err,body){
         if(!err){
             res.send(body);
         }else{
