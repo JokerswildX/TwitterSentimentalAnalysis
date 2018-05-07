@@ -6,31 +6,16 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
-
 var app = express();
-
 app.use("/public", express.static(__dirname + "/public"));
 
 var couchdb = require('nano')('http://localhost:9000');
-var twitterdb = couchdb.db.use('raw_data');
-// couchdb.db.get('twitter_single', function(err, body) {
-//     if (!err) {
-//         console.log("printing body");
-//         console.log(body);
-//     }
-// });
+var twitterdb = couchdb.db.use('data');
 couchdb.db.list(function (error, body, headers) {
-    // if(error) { return response.send(error.message, error['status-code']); }
-    // response.send(body, 200);
     console.log(body);
 });
 var insta;
-twitterdb.get('493802764774825984', { revs_info: true }, function(err, body) {
-    if (!err)
-        insta=body.rows;
-        // console.log(body.rows);
-});
+
 // twitterdb.view('raw_data','get_text', function(err, body) {
 //     if (!err) {
 //         console.log(body);
@@ -39,6 +24,15 @@ twitterdb.get('493802764774825984', { revs_info: true }, function(err, body) {
 //         });
 //     }
 // });
+app.get('/getSentiment',function(req,res){
+    twitterdb.view('data','get_sentiment',function(err,body){
+        if(!err){
+            res.send(body);
+        }else{
+            res.send("There was a problem sending the response");
+        }
+    });
+});
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');

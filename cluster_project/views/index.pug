@@ -13,13 +13,13 @@ block content
             option(value="worried") Worried
             option(value="notSatisfied") Not Satisfied
         div.buttonDiv
-          button(type="button" onclick='refreshContent()') Let's view it!
+          button#viewContent(type="button") Let's view it!
     div.box.content
       div.panel
         div.panel-header
           div.tabs
-            button(class="tablinks active" onclick="openTab(event,'mapView')") Map View
-            button(class="tablinks" onclick="openTab(event,'chartAnalysisView')" ) Chart Analysis View
+            button#mapbutton(class="tablinks active" data-val="mapView") Map View
+            button#chartbutton(class="tablinks" data-val="chartAnalysisView") Chart Analysis View
         div.panel-body
           div#mapView.tabcontent(style="display:block;")
             div#mapid
