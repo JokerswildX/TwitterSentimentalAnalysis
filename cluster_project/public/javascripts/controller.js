@@ -1,22 +1,28 @@
 $(function () {
     var handleTab = {
         openTab: function (view) {
+            var tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            document.getElementById(view).style.display = "block";
             if (view == "mapView") {
                 // if(this.map === undefined) {
-                this.keymap={
-                    "tot_tot":"Total Income",
-                    "M0_tot_p_":"Number of Immigrants",
-                    "M0_prtc_t":"Percentage of family areas in suburb",
-                    "M0_hl_p_h":"Number of Homeless people",
-                    "M0_p_tot":"Total occupation",
-                    "sa2_name16":"Suburb"
+                this.keymap = {
+                    "tot_tot": "Total Income",
+                    "M0_tot_p_": "Number of Immigrants",
+                    "M0_prtc_t": "Percentage of family areas in suburb",
+                    "M0_hl_p_h": "Number of Homeless people",
+                    "M0_p_tot": "Total occupation",
+                    "sa2_name16": "Suburb"
                 };
                 var that = this;
                 this.shpfile;
                 this.map = this.openMapView();
                 $('#chartbutton').removeClass('active');
                 $('#mapbutton').addClass('active');
-                var sum_Income =0;
+                var sum_Income = 0;
                 var count = 0;
                 that.averageIncome = 1211.465367965368;
                 that.averageHomeless = 53.673;
@@ -25,22 +31,22 @@ $(function () {
                 this.incomeMarker = L.AwesomeMarkers.icon({
                     icon: 'dollar-sign',
                     markerColor: 'black',
-                    prefix:'fa'
+                    prefix: 'fa'
                 });
                 this.homelessMarker = L.AwesomeMarkers.icon({
                     // icon: 'dollar-sign',
                     markerColor: 'purple',
-                    prefix:'fa'
+                    prefix: 'fa'
                 });
                 this.occupationMarker = L.AwesomeMarkers.icon({
                     icon: 'briefcase',
                     markerColor: 'blue',
-                    prefix:'fa'
+                    prefix: 'fa'
                 });
                 this.immigrantMarker = L.AwesomeMarkers.icon({
                     icon: 'users',
                     markerColor: 'yellow',
-                    prefix:'fa'
+                    prefix: 'fa'
                 });
                 $.ajax({
                     type: "GET",
@@ -48,12 +54,17 @@ $(function () {
                     contentType: 'application/json',
                     success: function (response) {
                         that.response = response;
+                        that.incomeVsSentiment = new Array();
                         that.info = L.control();
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
                             onEachFeature: function (feature, layer) {
                                 if (feature.properties) {
-                                    var suburbmapdata = getInfoFrom(Object,feature).join(" <br/>");
+                                    var suburbmapdata = getInfoFrom(Object, feature).join(" <br/>");
                                     layer.bindPopup(suburbmapdata);
+                                    if (feature.properties.sentimentDensity) {
+                                        that.incomeVsSentiment.push([feature.properties.sentimentDensity, feature.properties.tot_tot]);
+                                    }
+
                                     // sum_Income += feature.properties.tot_tot;
                                     // count++;
                                     // that.averageIncome = (sum_Income*1.0)/count;
@@ -63,8 +74,8 @@ $(function () {
                                     mouseout: resetHighlight
                                 });
                             },
-                            style: function(feature){
-                                if(feature.properties.sentimentDensity === undefined) {
+                            style: function (feature) {
+                                if (feature.properties.sentimentDensity === undefined) {
                                     feature.properties.sentimentDensity = that.getSentimentDensity(feature.properties.sa2_main16);
                                 }
 
@@ -88,32 +99,32 @@ $(function () {
 
                         // method that we will use to update the control based on feature properties passed
                         that.info.update = function (props) {
-                            if(props !== undefined) {
+                            if (props !== undefined) {
                                 var sentimentText = that.getSentimentText(props.sentimentDensity);
                             }
                             this._div.innerHTML = '<h4>Name of the Suburb</h4>' + (props ?
-                                '<b>' + props.sa2_name16 + '</b><br />' + sentimentText+  ''
+                                '<b>' + props.sa2_name16 + '</b><br />' + sentimentText + ''
                                 : 'Hover over a suburb');
                         };
 
                         that.info.addTo(that.map);
 
-                        function getInfoFrom(object,feature) {
+                        function getInfoFrom(object, feature) {
                             var displayRequiredData = [];
                             object.keys(feature.properties).map(function (k) {
-                                if(isNaN(parseInt(k))){
+                                if (isNaN(parseInt(k))) {
                                     key = k;
-                                }else{
+                                } else {
                                     key = k.substring(parseInt(k).toString().length);
                                     feature.properties[key] = feature.properties[k];
                                 }
-                                if(that.keymap[key] !== undefined) {
+                                if (that.keymap[key] !== undefined) {
                                     displayRequiredData.push(that.keymap[key] + ": " + feature.properties[k]);
                                 }
-                                if(that.keymap[key] === "Number of Immigrants"){
+                                if (that.keymap[key] === "Number of Immigrants") {
                                     sum_Income += feature.properties[k];
                                     count++;
-                                    console.log((sum_Income*1.0)/count);
+                                    console.log((sum_Income * 1.0) / count);
                                     console.log(count);
                                     // console.log(that.averageHomeless);
                                 }
@@ -140,10 +151,11 @@ $(function () {
                                 .openOn(that.map);
                         }
 
-                        function resetHighlight(e){
+                        function resetHighlight(e) {
                             that.shpfile.resetStyle(e.target);
                             that.info.update();
                         }
+
                         that.addLegend();
                     },
                     error: function (response) {
@@ -154,6 +166,7 @@ $(function () {
                 if (this.map !== undefined) {
                     this.map.remove();
                 }
+
                 this.openChartView();
                 $('#mapbutton').removeClass('active');
                 $('#chartbutton').addClass('active');
@@ -174,20 +187,17 @@ $(function () {
             }).addTo(mymap);
             return mymap;
         },
-        openChartView: function () {
-            // alert('hello');
-        },
         getColor: function (d) {
             return d > 0.75 ? '#587D0B' :
-                    d > 0.5 ? '#4EB60B' :
+                d > 0.5 ? '#4EB60B' :
                     d > 0.25 ? '#82BE0A' :
-                    d > 0 ? '#BAC608' :
-                    d > -0.25 ? '#CEA306' :
-                    d > -0.5 ? '#D67004' :
-                    d > -0.75 ? '#DE3602' :
-                    '#E60008';
+                        d > 0 ? '#BAC608' :
+                            d > -0.25 ? '#CEA306' :
+                                d > -0.5 ? '#D67004' :
+                                    d > -0.75 ? '#DE3602' :
+                                        '#E60008';
         },
-        addLegend: function(){
+        addLegend: function () {
             var that = this;
             this.legend = L.control({position: 'bottomright'});
             this.legend.onAdd = function (map) {
@@ -195,7 +205,7 @@ $(function () {
                     grades = [-1, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1],
                     labels = [];
                 // loop through our density intervals and generate a label with a colored square for each interval
-                for (var i = 0; i < grades.length-1; i++) {
+                for (var i = 0; i < grades.length - 1; i++) {
                     div.innerHTML +=
                         '<i style="background:' + that.getColor(grades[i] + 0.01) + ' "></i> ' +
                         grades[i] + ' - ' + grades[i + 1] + '<br>';
@@ -204,28 +214,28 @@ $(function () {
             };
             this.legend.addTo(this.map);
         },
-        refreshContent: function(){
+        refreshContent: function () {
             var selectedContent = $('.comboBox').val();
             // this.addMapPoints();
             // alert(selectedContent);
-            if(selectedContent !== "happiness"){
+            if (selectedContent !== "happiness") {
                 this.removeMapPoints();
-            }else{
+            } else {
                 this.addMapPoints();
             }
         },
-        getSentimentDensity: function(suburbId) {
+        getSentimentDensity: function (suburbId) {
             var sentimentDensity;
-            this.response.rows.forEach(function(doc) {
-                if(doc.key == suburbId) {
-                    sentimentDensity =doc.value.total/doc.value.count;
+            this.response.rows.forEach(function (doc) {
+                if (doc.key == suburbId) {
+                    sentimentDensity = doc.value.total / doc.value.count;
                 }
             });
             return sentimentDensity;
         },
-        getSentimentText: function(sentiment){
+        getSentimentText: function (sentiment) {
             var d = sentiment;
-            if(d !== undefined) {
+            if (d !== undefined) {
                 return d > 0.75 ? 'Very happy people :) :)' :
                     d > 0.5 ? 'Happy people :)' :
                         d > 0.25 ? "<i class='fa fa-smile'>" :
@@ -236,25 +246,25 @@ $(function () {
                                             'unknown';
             }
         },
-        addMapPoints:function(){
+        addMapPoints: function () {
             var that = this;
             var avgIncome = that.averageIncome;
             this.richSuburbMarkers = [];
             this.homelessSuburbMarkers = [];
             this.occupationSuburbMarkers = [];
             this.immigrantSuburbMarkers = [];
-            this.map.eachLayer(function(layer){
-               if(layer.feature && layer.feature.properties.tot_tot > (avgIncome*2.0)){
-                    that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.incomeMarker}));
-               }
-                if(layer.feature && layer.feature.properties.M0_hl_p_h > (that.averageHomeless*2.0)){
-                    that.homelessSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.homelessMarker}));
+            this.map.eachLayer(function (layer) {
+                if (layer.feature && layer.feature.properties.tot_tot > (avgIncome * 2.0)) {
+                    that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.incomeMarker}));
                 }
-                if(layer.feature && layer.feature.properties.M0_p_tot > (that.averageOccupation*2.0)){
-                    that.occupationSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.occupationMarker}));
+                if (layer.feature && layer.feature.properties.M0_hl_p_h > (that.averageHomeless * 2.0)) {
+                    that.homelessSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.homelessMarker}));
                 }
-                if(layer.feature && layer.feature.properties.M0_tot_p_ > (that.averageImmigrants*2.0)){
-                    that.immigrantSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.immigrantMarker}));
+                if (layer.feature && layer.feature.properties.M0_p_tot > (that.averageOccupation * 2.0)) {
+                    that.occupationSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.occupationMarker}));
+                }
+                if (layer.feature && layer.feature.properties.M0_tot_p_ > (that.averageImmigrants * 2.0)) {
+                    that.immigrantSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.immigrantMarker}));
                 }
             });
             this.richSuburbMarkerLayerGroup = L.layerGroup(this.richSuburbMarkers);
@@ -265,15 +275,111 @@ $(function () {
             // this.homelessSuburbMarkerLayerGroup.addTo(this.map);
             this.immigrantSuburbMarkerLayerGroup.addTo(this.map);
         },
-        removeMapPoints:function(layerGroup){
-            if(layerGroup !== undefined){
+        removeMapPoints: function (layerGroup) {
+            if (layerGroup !== undefined) {
                 this.map.removeLayer(layerGroup);
             }
         },
-        addLayerToMap:function(layer){
+        addLayerToMap: function (layer) {
             layer.addTo(this.map);
+        },
+
+
+        // removeMapPoints:function(){
+        //     if(this.richSuburbMarkerLayerGroup !== undefined){
+        //         this.map.removeLayer(this.richSuburbMarkerLayerGroup);
+        //     }
+        // }
+
+        openChartView: function () {
+            var myData = this.incomeVsSentiment.sort(function (a, b) {
+                return a[0] - b[0]
+            });
+            var myChart = new JSChart('chartId', 'line');
+            myChart.setDataArray(myData);
+            myChart.setAxisNameFontSize(10);
+            myChart.setAxisNameX('Sentiment Values');
+            myChart.setAxisNameY('Total Income');
+            myChart.setAxisNameColor('#787878');
+            myChart.setAxisValuesNumberX(20);
+            myChart.setAxisValuesNumberY(20);
+            myChart.setAxisValuesColor('#38a4d9');
+            myChart.setAxisColor('#38a4d9');
+            myChart.setLineColor('#C71112');
+            myChart.setTitle('Income VS Sentiment chart');
+            myChart.setTitleColor('#383838');
+            myChart.setGraphExtend(true);
+            myChart.setGridColor('#38a4d9');
+            myChart.setSize(800, 500);
+            myChart.setAxisPaddingLeft(140);
+            myChart.setAxisPaddingRight(140);
+            myChart.setAxisPaddingTop(60);
+            myChart.setAxisPaddingBottom(45);
+            myChart.setTextPaddingLeft(105);
+            myChart.setTextPaddingBottom(12);
+            myChart.setBackgroundImage('/javascripts/chart_bg.jpg');
+            myChart.draw();
+
+            // var ctx = document.getElementById("myChart");
+            // var myChart = new Chart(ctx, {
+            //     type: 'line',
+            //     data: {
+            //         labels: [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1],
+            //         datasets: [{
+            //             label: 'Income vs Sentiment Value',
+            //             // xaxisId: [1,2,3,4,5,6,7,8,9,10],
+            //             //     //[-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1],
+            //             // yaxisId: [1,2,3,4,5,6,7,8,9,10],
+            //             data: [
+            //                 {x:0.22,y:1},
+            //                 {x:-0.762,y:2},
+            //                 {x:0.43,y:3},
+            //                 {x:0.964,y:4},
+            //                 {x:-0.53,y:5}
+            //             ],
+            //             // data: [{
+            //             //     x: -10,
+            //             //     y: 0
+            //             // }, {
+            //             //     x: 0,
+            //             //     y: 10
+            //             // }, {
+            //             //     x: 10,
+            //             //     y: 5
+            //             // }],
+            //             pointBackgroundColor: 'blue',
+            //             pointRadius: 3,
+            //             pointHoverBackground: 'darkBlue',
+            //             pointHoverRadius: 4,
+            //             showLine: true,
+            //
+            //
+            //         }]
+            //     },
+            //     options: {
+            //         scales: {
+            //             yAxes: [{
+            //                 ticks: {
+            //                     // min: 1,
+            //                     // max: 9,
+            //                     stepSize: 1
+            //                 }
+            //             }],
+            //             // xAxes: [{
+            //             //     ticks: {
+            //             //         min: 1,
+            //             //         max: 9,
+            //             //         stepSize: 1
+            //             //     }
+            //             // }]
+            //         }
+            //     }
+            //
+            // });
+
         }
     };
+
 
     $('.tablinks').on('click', function (e) {
         var name = e.target.getAttribute('data-val');
@@ -286,22 +392,22 @@ $(function () {
     });
 
 
-    $('#richSuburb').click(function() {
+    $('#richSuburb').click(function () {
         if (!$(this).is(':checked')) {
             return confirm("Are you sure?");
         }
     });
-    $('#mostOccupations').click(function() {
+    $('#mostOccupations').click(function () {
         if (!$(this).is(':checked')) {
             return confirm("Are you sure?");
         }
     });
-    $('#mostImmigrants').click(function() {
+    $('#mostImmigrants').click(function () {
         if (!$(this).is(':checked')) {
             var a = "ass";
         }
     });
-    $('#mostHomeless').click(function() {
+    $('#mostHomeless').click(function () {
         if (!$(this).is(':checked')) {
             return confirm("Are you sure?");
         }

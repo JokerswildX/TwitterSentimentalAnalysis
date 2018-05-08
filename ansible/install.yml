@@ -2,7 +2,7 @@
 - hosts: nodes
   become: true
   roles:
-#     - common
-#     - webserver
+     - common
+     - webserver
      - couchdb
 
