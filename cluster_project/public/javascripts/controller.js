@@ -271,7 +271,10 @@ $(function () {
             this.homelessSuburbMarkerLayerGroup = L.layerGroup(this.homelessSuburbMarkers);
             this.occupationSuburbMarkerLayerGroup = L.layerGroup(this.occupationSuburbMarkers);
             this.immigrantSuburbMarkerLayerGroup = L.layerGroup(this.immigrantSuburbMarkers);
-            alert("Markers added!");
+            $('#richSuburb').removeAttr('disabled');
+            $('#mostHomeless').removeAttr('disabled');
+            $('#mostOccupations').removeAttr('disabled');
+            $('#mostImmigrants').removeAttr('disabled');
         },
         removeMapLayer: function (layerGroup) {
             if (layerGroup !== undefined) {
