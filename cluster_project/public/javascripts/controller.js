@@ -19,6 +19,29 @@ $(function () {
                 var sum_Income =0;
                 var count = 0;
                 that.averageIncome = 1211.465367965368;
+                that.averageHomeless = 53.673;
+                that.averageOccupation = 5896.941558441558;
+                that.averageImmigrants = 12811.867965367965;
+                this.incomeMarker = L.AwesomeMarkers.icon({
+                    icon: 'dollar-sign',
+                    markerColor: 'black',
+                    prefix:'fa'
+                });
+                this.homelessMarker = L.AwesomeMarkers.icon({
+                    // icon: 'dollar-sign',
+                    markerColor: 'purple',
+                    prefix:'fa'
+                });
+                this.occupationMarker = L.AwesomeMarkers.icon({
+                    icon: 'briefcase',
+                    markerColor: 'blue',
+                    prefix:'fa'
+                });
+                this.immigrantMarker = L.AwesomeMarkers.icon({
+                    icon: 'users',
+                    markerColor: 'yellow',
+                    prefix:'fa'
+                });
                 $.ajax({
                     type: "GET",
                     url: '/getSentiment',
@@ -34,9 +57,6 @@ $(function () {
                                     // sum_Income += feature.properties.tot_tot;
                                     // count++;
                                     // that.averageIncome = (sum_Income*1.0)/count;
-                                    // if(feature.properties.tot_tot > 2000){
-                                    //     L.marker([feature.geometry.bbox[1],feature.geometry.bbox[0]]).addTo(that.map);
-                                    // }
                                 }
                                 layer.on({
                                     mouseover: highlightFeature,
@@ -85,9 +105,17 @@ $(function () {
                                     key = k;
                                 }else{
                                     key = k.substring(parseInt(k).toString().length);
+                                    feature.properties[key] = feature.properties[k];
                                 }
                                 if(that.keymap[key] !== undefined) {
                                     displayRequiredData.push(that.keymap[key] + ": " + feature.properties[k]);
+                                }
+                                if(that.keymap[key] === "Number of Immigrants"){
+                                    sum_Income += feature.properties[k];
+                                    count++;
+                                    console.log((sum_Income*1.0)/count);
+                                    console.log(count);
+                                    // console.log(that.averageHomeless);
                                 }
                             });
                             return displayRequiredData;
@@ -178,11 +206,13 @@ $(function () {
         },
         refreshContent: function(){
             var selectedContent = $('.comboBox').val();
-            this.addMapPoints();
+            // this.addMapPoints();
             // alert(selectedContent);
-            // if(selectedContent !== "Happiness"){
-            //     this.removeMapPoints();
-            // }
+            if(selectedContent !== "happiness"){
+                this.removeMapPoints();
+            }else{
+                this.addMapPoints();
+            }
         },
         getSentimentDensity: function(suburbId) {
             var sentimentDensity;
@@ -210,25 +240,39 @@ $(function () {
             var that = this;
             var avgIncome = that.averageIncome;
             this.richSuburbMarkers = [];
-            var redMarker = L.AwesomeMarkers.icon({
-                icon: 'dollar-sign',
-                markerColor: 'black',
-                prefix:'fa'
-            });
+            this.homelessSuburbMarkers = [];
+            this.occupationSuburbMarkers = [];
+            this.immigrantSuburbMarkers = [];
             this.map.eachLayer(function(layer){
                if(layer.feature && layer.feature.properties.tot_tot > (avgIncome*2.0)){
-                    that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:redMarker}));
+                    that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.incomeMarker}));
                }
-               var s = 10;
+                if(layer.feature && layer.feature.properties.M0_hl_p_h > (that.averageHomeless*2.0)){
+                    that.homelessSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.homelessMarker}));
+                }
+                if(layer.feature && layer.feature.properties.M0_p_tot > (that.averageOccupation*2.0)){
+                    that.occupationSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.occupationMarker}));
+                }
+                if(layer.feature && layer.feature.properties.M0_tot_p_ > (that.averageImmigrants*2.0)){
+                    that.immigrantSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:that.immigrantMarker}));
+                }
             });
             this.richSuburbMarkerLayerGroup = L.layerGroup(this.richSuburbMarkers);
-            this.richSuburbMarkerLayerGroup.addTo(that.map);
+            this.homelessSuburbMarkerLayerGroup = L.layerGroup(this.homelessSuburbMarkers);
+            this.occupationSuburbMarkerLayerGroup = L.layerGroup(this.occupationSuburbMarkers);
+            this.immigrantSuburbMarkerLayerGroup = L.layerGroup(this.immigrantSuburbMarkers);
+            // this.richSuburbMarkerLayerGroup.addTo(this.map);
+            // this.homelessSuburbMarkerLayerGroup.addTo(this.map);
+            this.immigrantSuburbMarkerLayerGroup.addTo(this.map);
         },
-        // removeMapPoints:function(){
-        //     if(this.richSuburbMarkerLayerGroup !== undefined){
-        //         this.map.removeLayer(this.richSuburbMarkerLayerGroup);
-        //     }
-        // }
+        removeMapPoints:function(layerGroup){
+            if(layerGroup !== undefined){
+                this.map.removeLayer(layerGroup);
+            }
+        },
+        addLayerToMap:function(layer){
+            layer.addTo(this.map);
+        }
     };
 
     $('.tablinks').on('click', function (e) {
@@ -236,8 +280,31 @@ $(function () {
         handleTab.openTab(name);
     });
     handleTab.openTab("mapView");
+
     $('#viewContent').on('click', function (e) {
-        handleTab.refreshContent();
+        handleTab.addMapPoints();
+    });
+
+
+    $('#richSuburb').click(function() {
+        if (!$(this).is(':checked')) {
+            return confirm("Are you sure?");
+        }
+    });
+    $('#mostOccupations').click(function() {
+        if (!$(this).is(':checked')) {
+            return confirm("Are you sure?");
+        }
+    });
+    $('#mostImmigrants').click(function() {
+        if (!$(this).is(':checked')) {
+            var a = "ass";
+        }
+    });
+    $('#mostHomeless').click(function() {
+        if (!$(this).is(':checked')) {
+            return confirm("Are you sure?");
+        }
     });
 });
 
