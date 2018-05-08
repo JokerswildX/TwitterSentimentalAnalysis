@@ -6,12 +6,8 @@ block content
     div.box.sidebar
       div.sidebarContainer
         div Select one of the option to view the distribution in map view:
-        div.comboBoxDiv
-          select.comboBox
-            option(value="happiness") Happiness
-            option(value="sad") Sad
-            option(value="worried") Worried
-            option(value="notSatisfied") Not Satisfied
+          div.buttonDiv
+            button#viewContent(type="button") Calculate Map Markers!
           span Display rich suburbs
           input#richSuburb(type='checkbox' name='richSuburbs')
           br
@@ -24,8 +20,6 @@ block content
           span Display suburbs with many homeless people
           input#mostHomeless(type='checkbox' name='suburbHomeless')
           br
-        div.buttonDiv
-          button#viewContent(type="button") Calculate Map Markers!
     div.box.content
       div.panel
         div.panel-header
