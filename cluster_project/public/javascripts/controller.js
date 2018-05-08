@@ -16,7 +16,9 @@ $(function () {
                 this.map = this.openMapView();
                 $('#chartbutton').removeClass('active');
                 $('#mapbutton').addClass('active');
-                var key;
+                var sum_Income =0;
+                var count = 0;
+                that.averageIncome = 1211.465367965368;
                 $.ajax({
                     type: "GET",
                     url: '/getSentiment',
@@ -27,19 +29,14 @@ $(function () {
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
                             onEachFeature: function (feature, layer) {
                                 if (feature.properties) {
-
-                                    layer.bindPopup(Object.keys(feature.properties).map(function (k) {
-                                        if(isNaN(parseInt(k))){
-                                           key = k;
-                                        }else{
-                                           key = k.substring(parseInt(k).toString().length);
-                                        }
-                                        if(that.keymap[key] !== undefined) {
-                                            return that.keymap[key] + ": " + feature.properties[k];
-                                        }
-                                    }).join("<br />"), {
-                                        maxHeight: 200
-                                    });
+                                    var suburbmapdata = getInfoFrom(Object,feature).join(" <br/>");
+                                    layer.bindPopup(suburbmapdata);
+                                    // sum_Income += feature.properties.tot_tot;
+                                    // count++;
+                                    // that.averageIncome = (sum_Income*1.0)/count;
+                                    // if(feature.properties.tot_tot > 2000){
+                                    //     L.marker([feature.geometry.bbox[1],feature.geometry.bbox[0]]).addTo(that.map);
+                                    // }
                                 }
                                 layer.on({
                                     mouseover: highlightFeature,
@@ -62,6 +59,7 @@ $(function () {
                             }
                         });
                         that.shpfile.addTo(that.map);
+                        // that.addMapPoints();
                         that.info.onAdd = function (map) {
                             this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
                             this.update();
@@ -70,12 +68,30 @@ $(function () {
 
                         // method that we will use to update the control based on feature properties passed
                         that.info.update = function (props) {
+                            if(props !== undefined) {
+                                var sentimentText = that.getSentimentText(props);
+                            }
                             this._div.innerHTML = '<h4>Name of the Suburb</h4>' + (props ?
-                                '<b>' + props.sa2_name16 + '</b><br />' + 'Happy people :-)'
+                                '<b>' + props.sa2_name16 + '</b><br />' + sentimentText+ ''
                                 : 'Hover over a suburb');
                         };
 
                         that.info.addTo(that.map);
+
+                        function getInfoFrom(object,feature) {
+                            var displayRequiredData = [];
+                            object.keys(feature.properties).map(function (k) {
+                                if(isNaN(parseInt(k))){
+                                    key = k;
+                                }else{
+                                    key = k.substring(parseInt(k).toString().length);
+                                }
+                                if(that.keymap[key] !== undefined) {
+                                    displayRequiredData.push(that.keymap[key] + ": " + feature.properties[k]);
+                                }
+                            });
+                            return displayRequiredData;
+                        }
 
                         function highlightFeature(e) {
                             var layer = e.target;
@@ -100,9 +116,7 @@ $(function () {
                             that.shpfile.resetStyle(e.target);
                             that.info.update();
                         }
-
                         that.addLegend();
-
                     },
                     error: function (response) {
                         console.log(response);
@@ -174,6 +188,27 @@ $(function () {
                 }
             });
             return sentimentDensity;
+        },
+        getSentimentText: function(props){
+            var d = props.sentimentDensity;
+            if(d !== undefined) {
+                return d > 0.75 ? 'Very happy people :) :)' :
+                    d > 0.5 ? 'Happy people :)' :
+                        d > 0.25 ? 'Mildly happy people' :
+                            d > 0 ? 'Neutral' :
+                                d > -0.25 ? 'Mildly unhappy' :
+                                    d > -0.5 ? 'Unhappy people :(' :
+                                        d > -0.75 ? 'Very unhappy people :( :(' :
+                                            'unknown';
+            }
+        },
+        addMapPoints:function(){
+            var that = this;
+            // var markerClusters = L.markerClusterGroup();
+            // this.map.eachLayer(function(layer){
+            //    var s = 10;
+            // });
+
         }
     };
 
