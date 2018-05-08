@@ -69,10 +69,10 @@ $(function () {
                         // method that we will use to update the control based on feature properties passed
                         that.info.update = function (props) {
                             if(props !== undefined) {
-                                var sentimentText = that.getSentimentText(props);
+                                var sentimentText = that.getSentimentText(props.sentimentDensity);
                             }
                             this._div.innerHTML = '<h4>Name of the Suburb</h4>' + (props ?
-                                '<b>' + props.sa2_name16 + '</b><br />' + sentimentText+ ''
+                                '<b>' + props.sa2_name16 + '</b><br />' + sentimentText+  ''
                                 : 'Hover over a suburb');
                         };
 
@@ -108,7 +108,7 @@ $(function () {
                             that.info.update(layer.feature.properties);
                             var popup = L.popup()
                                 .setLatLng(e.latlng)
-                                .setContent('Popup')
+                                .setContent(that.getSentimentText(e.target.feature.properties.sentimentDensity))
                                 .openOn(that.map);
                         }
 
@@ -178,7 +178,11 @@ $(function () {
         },
         refreshContent: function(){
             var selectedContent = $('.comboBox').val();
-            alert(selectedContent);
+            this.addMapPoints();
+            // alert(selectedContent);
+            // if(selectedContent !== "Happiness"){
+            //     this.removeMapPoints();
+            // }
         },
         getSentimentDensity: function(suburbId) {
             var sentimentDensity;
@@ -189,14 +193,14 @@ $(function () {
             });
             return sentimentDensity;
         },
-        getSentimentText: function(props){
-            var d = props.sentimentDensity;
+        getSentimentText: function(sentiment){
+            var d = sentiment;
             if(d !== undefined) {
                 return d > 0.75 ? 'Very happy people :) :)' :
                     d > 0.5 ? 'Happy people :)' :
-                        d > 0.25 ? 'Mildly happy people' :
-                            d > 0 ? 'Neutral' :
-                                d > -0.25 ? 'Mildly unhappy' :
+                        d > 0.25 ? "<i class='fa fa-smile'>" :
+                            d > 0 ? "<i class='fa fa-meh'>" :
+                                d > -0.25 ? "<i class='fa fa-frown'>" :
                                     d > -0.5 ? 'Unhappy people :(' :
                                         d > -0.75 ? 'Very unhappy people :( :(' :
                                             'unknown';
@@ -204,12 +208,27 @@ $(function () {
         },
         addMapPoints:function(){
             var that = this;
-            // var markerClusters = L.markerClusterGroup();
-            // this.map.eachLayer(function(layer){
-            //    var s = 10;
-            // });
-
-        }
+            var avgIncome = that.averageIncome;
+            this.richSuburbMarkers = [];
+            var redMarker = L.AwesomeMarkers.icon({
+                icon: 'dollar-sign',
+                markerColor: 'black',
+                prefix:'fa'
+            });
+            this.map.eachLayer(function(layer){
+               if(layer.feature && layer.feature.properties.tot_tot > (avgIncome*2.0)){
+                    that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat,layer._latlngs[0][0].lng],{icon:redMarker}));
+               }
+               var s = 10;
+            });
+            this.richSuburbMarkerLayerGroup = L.layerGroup(this.richSuburbMarkers);
+            this.richSuburbMarkerLayerGroup.addTo(that.map);
+        },
+        // removeMapPoints:function(){
+        //     if(this.richSuburbMarkerLayerGroup !== undefined){
+        //         this.map.removeLayer(this.richSuburbMarkerLayerGroup);
+        //     }
+        // }
     };
 
     $('.tablinks').on('click', function (e) {
