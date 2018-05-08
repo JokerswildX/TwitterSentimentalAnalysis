@@ -25,9 +25,10 @@ from shapely import geometry
 # --------------------------------------------------------------------------------------------------------------
 
 
-user = "admin"
-password = "admin"
-SERVER = couchdb.Server("http://%s:%s@localhost:5984/" % (user, password))
+#user = "admin"
+#password = "admin"
+#SERVER = couchdb.Server("http://%s:%s@localhost:5984/" % (user, password))
+SERVER = couchdb.Server("http://localhost:5984/")
 dbname = 'data'
 shapefile = './shapefiles/shapefile.shp' 
 

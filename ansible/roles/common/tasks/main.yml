@@ -24,3 +24,10 @@
     - textblob
     - shapely
     - fiona
+
+- name: get files from GIT repository
+  git:
+    repo: 'https://github.com/Sindhu-Sekar/TwitterSentimentalAnalysis.git'
+    dest: /home/ubuntu/git_files
+    version: master
+    force: yes

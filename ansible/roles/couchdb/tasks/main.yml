@@ -39,3 +39,6 @@
     Content-Type: "application/json"
     body: "{{ lookup('file','get_sentiment.json') }}"
     body_format: json
+
+- name: start the tweet harvester
+  shell: "nohup python /home/ubuntu/git_files/twitter_harvester/GetTweets_harvester.py &"
