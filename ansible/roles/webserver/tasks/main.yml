@@ -1,0 +1,32 @@
+
+- name: get files from GIT repository
+  git:
+    repo: 'https://github.com/Sindhu-Sekar/TwitterSentimentalAnalysis.git'
+    dest: /home/ubuntu/git_files
+    version: master
+    force: yes
+
+- name: add nodejs repository to apt (part1)
+  shell: 'curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh'
+  args:
+    warn: false
+
+- name: add nodejs repository to apt (part2)
+  shell: 'bash nodesource_setup.sh'
+
+- name: install git 
+  apt:
+    name: git
+    state: latest
+    update_cache: yes
+  with_items: 
+    - git
+    - nodejs
+    - build-essential
+
+- name: Clear npm cache
+  shell: 'npm cache clear -f'
+
+- name: install n globally
+  npm: name=n global=yes state=latest
+

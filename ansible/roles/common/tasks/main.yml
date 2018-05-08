@@ -1,0 +1,25 @@
+
+- name: install dependencies
+  apt:
+    name: "{{item}}"
+    state: present
+    update_cache: yes
+  with_items:
+    - software-properties-common
+    - apt-transport-https
+    - ca-certificates
+    - python-setuptools
+    - python-pip
+    - curl
+
+
+- name: install python packages
+  pip: 
+    name: "{{item}}"
+  with_items:
+    - httplib2
+    - couchdb
+    - tweepy
+    - textblob
+    - shapely
+    - fiona

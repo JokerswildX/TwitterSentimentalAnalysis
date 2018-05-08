@@ -1,0 +1,41 @@
+
+- name: install front-end dependencies
+  apt:  
+    name: couchdb
+    state: latest
+    update_cache: yes
+  with_items:
+    - couchdb
+
+- name: add couchdb repository to apt
+  shell: 'echo "deb https://apache.bintray.com/couchdb-deb xenial main" | sudo tee -a /etc/apt/sources.list'
+
+- name: add repository key to apt
+  shell: 'curl -L https://couchdb.apache.org/repo/bintray-pubkey.asc | sudo apt-key add -'
+  args: 
+    warn: false
+
+- name: start couchdb service
+  service: 
+    name: couchdb
+    state: started
+    enabled: yes
+
+
+- name: create couchdb database for storing tweets
+  uri:
+    url: 'http://localhost:5984/{{db_name}}'
+    method: PUT
+    status_code: 201, 412
+    return_content: yes
+    Content-Type: "application/json"
+
+- name: create couchdb views
+  uri:
+    url: 'http://127.0.0.1:5984/{{db_name}}/_design/{{view_name}}'
+    method: PUT
+    status_code: 201, 409
+    return_content: yes
+    Content-Type: "application/json"
+    body: "{{ lookup('file','get_sentiment.json') }}"
+    body_format: json

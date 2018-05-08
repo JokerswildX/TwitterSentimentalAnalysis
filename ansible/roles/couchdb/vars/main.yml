@@ -1,0 +1,7 @@
+---
+couchdb_user: team34
+couchdb_pass: team34
+db_name: data
+view_name: get_sentiment
+node_count: 2
+bind_address: 0.0.0.0

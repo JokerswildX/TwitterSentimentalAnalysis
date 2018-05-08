@@ -1,0 +1,9 @@
+{
+  "_id" : "_design/example",
+  "views" : {
+    "get_sentiment" : {
+      "map" : "function(doc){ emit(doc.properties.sa2_main16, doc.sentiment)}",
+      "reduce" : "function(key, values, rereduce) { var result = {total: 0, count: 0}; for(i=0; i < values.length; i++) { if(rereduce) { result.total = result.total + values[i].total;  result.count = result.count + values[i].count; } else {  result.total = sum(values);  result.count = values.length; } } return(result); }"
+    }
+  }
+}

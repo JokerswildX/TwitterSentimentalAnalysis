@@ -1,0 +1,8 @@
+---
+- hosts: nodes
+  become: true
+  roles:
+#     - common
+#     - webserver
+     - couchdb
+
