@@ -5,6 +5,9 @@ block content
     div.box.header Welcome to Twitter Sentiment Analysis
     div.box.sidebar
       div.sidebarContainer
+        div Select one of the option to view the distribution in map view:
+        div.buttonDiv
+          button#viewContent.btn-primary(type="button") Calculate Map Markers!
         div.control-group
           div.col-sm-2.controls
             input#richSuburb(type='checkbox' name='richSuburbs')
@@ -21,8 +24,6 @@ block content
           div.col-sm-2.controls
             input#mostHomeless(type='checkbox' name='suburbHomeless')
           label.col-sm-10.control-label Display suburbs with many homeless people
-        div.buttonDiv
-          button#viewContent.btn-primary(type="button") Calculate Map Markers!
     div.box.content
       div.panel
         div.panel-header

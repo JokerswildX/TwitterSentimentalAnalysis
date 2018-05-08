@@ -271,11 +271,9 @@ $(function () {
             this.homelessSuburbMarkerLayerGroup = L.layerGroup(this.homelessSuburbMarkers);
             this.occupationSuburbMarkerLayerGroup = L.layerGroup(this.occupationSuburbMarkers);
             this.immigrantSuburbMarkerLayerGroup = L.layerGroup(this.immigrantSuburbMarkers);
-            // this.richSuburbMarkerLayerGroup.addTo(this.map);
-            // this.homelessSuburbMarkerLayerGroup.addTo(this.map);
-            this.immigrantSuburbMarkerLayerGroup.addTo(this.map);
+            alert("Markers added!");
         },
-        removeMapPoints: function (layerGroup) {
+        removeMapLayer: function (layerGroup) {
             if (layerGroup !== undefined) {
                 this.map.removeLayer(layerGroup);
             }
@@ -283,14 +281,29 @@ $(function () {
         addLayerToMap: function (layer) {
             layer.addTo(this.map);
         },
-
-
-        // removeMapPoints:function(){
-        //     if(this.richSuburbMarkerLayerGroup !== undefined){
-        //         this.map.removeLayer(this.richSuburbMarkerLayerGroup);
-        //     }
-        // }
-
+        handleLayers:function(visual,operation){
+            if(operation === "add") {
+                if (visual === "richSuburb") {
+                    this.addLayerToMap(this.richSuburbMarkerLayerGroup);
+                } else if (visual === "mostOccupations") {
+                    this.addLayerToMap(this.occupationSuburbMarkerLayerGroup);
+                } else if (visual === "mostImmigrants") {
+                    this.addLayerToMap(this.immigrantSuburbMarkerLayerGroup);
+                } else {
+                    this.addLayerToMap(this.homelessSuburbMarkerLayerGroup);
+                }
+            }else{
+                if (visual === "richSuburb") {
+                    this.removeMapLayer(this.richSuburbMarkerLayerGroup);
+                } else if (visual === "mostOccupations") {
+                    this.removeMapLayer(this.occupationSuburbMarkerLayerGroup);
+                } else if (visual === "mostImmigrants") {
+                    this.removeMapLayer(this.immigrantSuburbMarkerLayerGroup);
+                } else {
+                    this.removeMapLayer(this.homelessSuburbMarkerLayerGroup);
+                }
+            }
+        },
         openChartView: function () {
             var myData = this.incomeVsSentiment.sort(function (a, b) {
                 return a[0] - b[0]
@@ -380,7 +393,6 @@ $(function () {
         }
     };
 
-
     $('.tablinks').on('click', function (e) {
         var name = e.target.getAttribute('data-val');
         handleTab.openTab(name);
@@ -391,25 +403,32 @@ $(function () {
         handleTab.addMapPoints();
     });
 
-
     $('#richSuburb').click(function () {
         if (!$(this).is(':checked')) {
-            return confirm("Are you sure?");
+            handleTab.handleLayers("richSuburb","remove");
+        }else{
+            handleTab.handleLayers("richSuburb","add");
         }
     });
     $('#mostOccupations').click(function () {
         if (!$(this).is(':checked')) {
-            return confirm("Are you sure?");
+            handleTab.handleLayers("mostOccupations","remove");
+        }else{
+            handleTab.handleLayers("mostOccupations","add");
         }
     });
     $('#mostImmigrants').click(function () {
         if (!$(this).is(':checked')) {
-            var a = "ass";
+            handleTab.handleLayers("mostImmigrants","remove");
+        }else{
+            handleTab.handleLayers("mostImmigrants","add");
         }
     });
     $('#mostHomeless').click(function () {
         if (!$(this).is(':checked')) {
-            return confirm("Are you sure?");
+            handleTab.handleLayers("mostHomeless","remove");
+        }else{
+            handleTab.handleLayers("mostHomeless","add");
         }
     });
 });
