@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "watch": "nodemon server.js -e js,pug",
-    "start": "node server.js"
+    "watch": "nodemon app.js -e js,pug",
+    "start": "node app.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -13,8 +13,10 @@
     "http-errors": "~1.6.2",
     "jquery": "^3.3.1",
     "morgan": "~1.9.0",
+    "nano": "^6.4.3",
     "pug": "^2.0.0-beta11",
     "request": "^2.85.0",
-    "requirejs": "^2.3.5"
+    "requirejs": "^2.3.5",
+    "shpjs": "^3.4.2"
   }
 }
