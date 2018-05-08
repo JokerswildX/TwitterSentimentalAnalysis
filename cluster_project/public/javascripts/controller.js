@@ -1,6 +1,12 @@
 $(function () {
     var handleTab = {
         openTab: function (view) {
+            var tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            document.getElementById(view).style.display = "block";
             if (view == "mapView") {
                 // if(this.map === undefined) {
                 this.keymap={
@@ -25,12 +31,17 @@ $(function () {
                     contentType: 'application/json',
                     success: function (response) {
                         that.response = response;
+                        that.incomeVsSentiment = new Array();
                         that.info = L.control();
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
                             onEachFeature: function (feature, layer) {
                                 if (feature.properties) {
                                     var suburbmapdata = getInfoFrom(Object,feature).join(" <br/>");
                                     layer.bindPopup(suburbmapdata);
+                                    if(feature.properties.sentimentDensity) {
+                                        that.incomeVsSentiment.push([feature.properties.sentimentDensity, feature.properties.tot_tot]);
+                                    }
+
                                     // sum_Income += feature.properties.tot_tot;
                                     // count++;
                                     // that.averageIncome = (sum_Income*1.0)/count;
@@ -126,6 +137,7 @@ $(function () {
                 if (this.map !== undefined) {
                     this.map.remove();
                 }
+
                 this.openChartView();
                 $('#mapbutton').removeClass('active');
                 $('#chartbutton').addClass('active');
@@ -145,9 +157,6 @@ $(function () {
                 accessToken: 'pk.eyJ1IjoibWFwYm94YW50OTIiLCJhIjoiY2pnbnNxMHM5MTg1cDMzcm05b3h5a3dyZCJ9.9RFYeawcSEckqpspzzhKxQ'
             }).addTo(mymap);
             return mymap;
-        },
-        openChartView: function () {
-            // alert('hello');
         },
         getColor: function (d) {
             return d > 0.75 ? '#587D0B' :
@@ -229,6 +238,94 @@ $(function () {
         //         this.map.removeLayer(this.richSuburbMarkerLayerGroup);
         //     }
         // }
+
+        openChartView: function () {
+            var myData = this.incomeVsSentiment.sort(function(a,b) {
+                return a[0]-b[0]
+            });
+            var myChart = new JSChart('chartId', 'line');
+            myChart.setDataArray(myData);
+            myChart.setAxisNameFontSize(10);
+            myChart.setAxisNameX('Sentiment Values');
+            myChart.setAxisNameY('Total Income');
+            myChart.setAxisNameColor('#787878');
+            myChart.setAxisValuesNumberX(20);
+            myChart.setAxisValuesNumberY(20);
+            myChart.setAxisValuesColor('#38a4d9');
+            myChart.setAxisColor('#38a4d9');
+            myChart.setLineColor('#C71112');
+            myChart.setTitle('Income VS Sentiment chart');
+            myChart.setTitleColor('#383838');
+            myChart.setGraphExtend(true);
+            myChart.setGridColor('#38a4d9');
+            myChart.setSize(800, 500);
+            myChart.setAxisPaddingLeft(140);
+            myChart.setAxisPaddingRight(140);
+            myChart.setAxisPaddingTop(60);
+            myChart.setAxisPaddingBottom(45);
+            myChart.setTextPaddingLeft(105);
+            myChart.setTextPaddingBottom(12);
+            myChart.setBackgroundImage('/javascripts/chart_bg.jpg');
+            myChart.draw();
+
+            // var ctx = document.getElementById("myChart");
+            // var myChart = new Chart(ctx, {
+            //     type: 'line',
+            //     data: {
+            //         labels: [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1],
+            //         datasets: [{
+            //             label: 'Income vs Sentiment Value',
+            //             // xaxisId: [1,2,3,4,5,6,7,8,9,10],
+            //             //     //[-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1],
+            //             // yaxisId: [1,2,3,4,5,6,7,8,9,10],
+            //             data: [
+            //                 {x:0.22,y:1},
+            //                 {x:-0.762,y:2},
+            //                 {x:0.43,y:3},
+            //                 {x:0.964,y:4},
+            //                 {x:-0.53,y:5}
+            //             ],
+            //             // data: [{
+            //             //     x: -10,
+            //             //     y: 0
+            //             // }, {
+            //             //     x: 0,
+            //             //     y: 10
+            //             // }, {
+            //             //     x: 10,
+            //             //     y: 5
+            //             // }],
+            //             pointBackgroundColor: 'blue',
+            //             pointRadius: 3,
+            //             pointHoverBackground: 'darkBlue',
+            //             pointHoverRadius: 4,
+            //             showLine: true,
+            //
+            //
+            //         }]
+            //     },
+            //     options: {
+            //         scales: {
+            //             yAxes: [{
+            //                 ticks: {
+            //                     // min: 1,
+            //                     // max: 9,
+            //                     stepSize: 1
+            //                 }
+            //             }],
+            //             // xAxes: [{
+            //             //     ticks: {
+            //             //         min: 1,
+            //             //         max: 9,
+            //             //         stepSize: 1
+            //             //     }
+            //             // }]
+            //         }
+            //     }
+            //
+            // });
+
+        }
     };
 
     $('.tablinks').on('click', function (e) {

@@ -101,6 +101,14 @@ body {
   height: 500px;
 }
 
+#chartId{
+  height: 450px;
+}
+
+#myChart{
+  height:350px !important;
+  width:500px !important;
+}
 .legend {
   line-height: 18px;
   color: #555;
