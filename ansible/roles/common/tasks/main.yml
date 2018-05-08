@@ -2,7 +2,7 @@
 - name: install dependencies
   apt:
     name: "{{item}}"
-    state: present
+    state: latest
     update_cache: yes
   with_items:
     - software-properties-common
@@ -11,6 +11,7 @@
     - python-setuptools
     - python-pip
     - curl
+    - git
 
 
 - name: install python packages
@@ -23,3 +24,10 @@
     - textblob
     - shapely
     - fiona
+
+- name: get files from GIT repository
+  git:
+    repo: 'https://github.com/Sindhu-Sekar/TwitterSentimentalAnalysis.git'
+    dest: /home/ubuntu/git_files
+    version: master
+    force: yes
