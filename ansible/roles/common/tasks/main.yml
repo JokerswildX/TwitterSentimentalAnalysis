@@ -2,7 +2,7 @@
 - name: install dependencies
   apt:
     name: "{{item}}"
-    state: present
+    state: latest
     update_cache: yes
   with_items:
     - software-properties-common
@@ -11,6 +11,7 @@
     - python-setuptools
     - python-pip
     - curl
+    - git
 
 
 - name: install python packages

@@ -14,13 +14,12 @@
 - name: add nodejs repository to apt (part2)
   shell: 'bash nodesource_setup.sh'
 
-- name: install git 
+- name: install webserver dependencies 
   apt:
     name: git
     state: latest
     update_cache: yes
   with_items: 
-    - git
     - nodejs
     - build-essential
 
