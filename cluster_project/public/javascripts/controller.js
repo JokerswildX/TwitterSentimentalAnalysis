@@ -8,7 +8,6 @@ $(function () {
 
             document.getElementById(view).style.display = "block";
             if (view == "mapView") {
-                // if(this.map === undefined) {
                 this.keymap = {
                     "tot_tot": "Total Income",
                     "M0_tot_p_": "Number of Immigrants",
@@ -21,7 +20,7 @@ $(function () {
                 this.min = 0;
                 this.max = 0;
                 this.shpfile;
-                this.map = this.openMapView();
+                this.map = this.response == undefined ? this.openMapView() : this.map;
                 $('#chartbutton').removeClass('active');
                 $('#mapbutton').addClass('active');
                 var sum_Income = 0;
@@ -36,7 +35,6 @@ $(function () {
                     prefix: 'fa'
                 });
                 this.homelessMarker = L.AwesomeMarkers.icon({
-                    // icon: 'dollar-sign',
                     markerColor: 'purple',
                     prefix: 'fa'
                 });
@@ -50,128 +48,131 @@ $(function () {
                     markerColor: 'yellow',
                     prefix: 'fa'
                 });
-                $.ajax({
-                    type: "GET",
-                    url: '/getSentiment',
-                    contentType: 'application/json',
-                    success: function (response) {
-                        if(response.type !== undefined && response.type==="db"){
-                            $("#error").text(response.message);
-                            $("#viewContent").attr('disabled','true');
-                            return;
-                        }
-                        that.response = response;
-                        that.incomeVsSentiment = new Array();
-                        that.occupationVsSentiment = new Array();
-                        that.immigrantsVsSentiment = new Array();
-                        that.homelessPeopleVsSentiment = new Array();
-                        that.info = L.control();
+                if(!this.response) {
+                    $("body").addClass("loading");
+                    $.ajax({
+                        type: "GET",
+                        url: '/getSentiment',
+                        contentType: 'application/json',
+                        success: function (response) {
+                            if(response.type !== undefined && response.type==="db"){
+                                $("#error").text(response.message);
+                                $("#viewContent").attr('disabled','true');
+                                return;
+                            }
+                            that.response = response;
+                            that.incomeVsSentiment = new Array();
+                            that.occupationVsSentiment = new Array();
+                            that.immigrantsVsSentiment = new Array();
+                            that.homelessPeopleVsSentiment = new Array();
+                            that.info = L.control();
 
-                        that.calculateAndFindMinMaxRange(response);
-                        that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
-                            onEachFeature: function (feature, layer) {
-                                if (feature.properties) {
-                                    var suburbmapdata = getInfoFrom(Object, feature).join(" <br/>");
-                                    layer.bindPopup(suburbmapdata);
-                                    if (feature.properties.sentimentDensity) {
-                                        that.incomeVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.tot_tot});
-                                        that.occupationVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_p_tot});
-                                        that.immigrantsVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_tot_p_});
-                                        that.homelessPeopleVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_hl_p_h});
+                            that.calculateAndFindMinMaxRange(response);
+                            that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
+                                onEachFeature: function (feature, layer) {
+                                    if (feature.properties) {
+                                        var suburbmapdata = getInfoFrom(Object, feature).join(" <br/>");
+                                        layer.bindPopup(suburbmapdata);
+                                        if (feature.properties.sentimentDensity) {
+                                            that.incomeVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.tot_tot});
+                                            that.occupationVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_p_tot});
+                                            that.immigrantsVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_tot_p_});
+                                            that.homelessPeopleVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_hl_p_h});
+                                        }
                                     }
+                                    layer.on({
+                                        mouseover: highlightFeature,
+                                        mouseout: resetHighlight
+                                    });
+                                },
+                                style: function (feature) {
+                                    if (feature.properties.sentimentDensity === undefined) {
+                                        feature.properties.sentimentDensity = that.getSentimentDensity(feature.properties.sa2_main16);
+                                    }
+
+                                    return {
+                                        fillColor: that.getColor(feature.properties.sentimentDensity),
+                                        weight: 1,
+                                        opacity: 1,
+                                        color: 'black',
+                                        dashArray: '3',
+                                        fillOpacity: 0.7
+                                    };
                                 }
-                                layer.on({
-                                    mouseover: highlightFeature,
-                                    mouseout: resetHighlight
+                            });
+                            that.shpfile.addTo(that.map);
+                            that.info.onAdd = function (map) {
+                                this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+                                this.update();
+                                return this._div;
+                            };
+
+                            // method that we will use to update the control based on feature properties passed
+                            that.info.update = function (props) {
+                                if (props !== undefined) {
+                                    var sentimentText = that.getSentimentText(props.sentimentDensity);
+                                }
+                                this._div.innerHTML = '<h4>Name of the Suburb</h4>' + (props ?
+                                    '<b>' + props.sa2_name16 + '</b><br />' + sentimentText + ''
+                                    : 'Hover over a suburb');
+                            };
+
+                            that.info.addTo(that.map);
+
+                            function getInfoFrom(object, feature) {
+                                var displayRequiredData = [];
+                                object.keys(feature.properties).map(function (k) {
+                                    if (isNaN(parseInt(k))) {
+                                        key = k;
+                                    } else {
+                                        key = k.substring(parseInt(k).toString().length);
+                                        feature.properties[key] = feature.properties[k];
+                                        delete k;
+                                    }
+                                    if (that.keymap[key] !== undefined && (!isNaN(feature.properties[key]) || key === "sa2_name16")) {
+                                        displayRequiredData.push(that.keymap[key] + ": " + feature.properties[key]);
+                                    }
                                 });
-                            },
-                            style: function (feature) {
-                                if (feature.properties.sentimentDensity === undefined) {
-                                    feature.properties.sentimentDensity = that.getSentimentDensity(feature.properties.sa2_main16);
-                                }
+                                return displayRequiredData;
+                            }
 
-                                return {
-                                    fillColor: that.getColor(feature.properties.sentimentDensity),
-                                    weight: 1,
-                                    opacity: 1,
+                            function highlightFeature(e) {
+                                var layer = e.target;
+                                layer.setStyle({
+                                    weight: 3,
                                     color: 'black',
-                                    dashArray: '3',
+                                    dashArray: '',
                                     fillOpacity: 0.7
-                                };
-                            }
-                        });
-                        that.shpfile.addTo(that.map);
-                        that.info.onAdd = function (map) {
-                            this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-                            this.update();
-                            return this._div;
-                        };
+                                });
 
-                        // method that we will use to update the control based on feature properties passed
-                        that.info.update = function (props) {
-                            if (props !== undefined) {
-                                var sentimentText = that.getSentimentText(props.sentimentDensity);
-                            }
-                            this._div.innerHTML = '<h4>Name of the Suburb</h4>' + (props ?
-                                '<b>' + props.sa2_name16 + '</b><br />' + sentimentText + ''
-                                : 'Hover over a suburb');
-                        };
-
-                        that.info.addTo(that.map);
-
-                        function getInfoFrom(object, feature) {
-                            var displayRequiredData = [];
-                            object.keys(feature.properties).map(function (k) {
-                                if (isNaN(parseInt(k))) {
-                                    key = k;
-                                } else {
-                                    key = k.substring(parseInt(k).toString().length);
-                                    feature.properties[key] = feature.properties[k];
-                                    delete k;
+                                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                                    layer.bringToFront();
                                 }
-                                if (that.keymap[key] !== undefined && (!isNaN(feature.properties[key]) || key === "sa2_name16")) {
-                                    displayRequiredData.push(that.keymap[key] + ": " + feature.properties[key]);
-                                }
-                            });
-                            return displayRequiredData;
-                        }
-
-                        function highlightFeature(e) {
-                            var layer = e.target;
-                            layer.setStyle({
-                                weight: 3,
-                                color: 'black',
-                                dashArray: '',
-                                fillOpacity: 0.7
-                            });
-
-                            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                                layer.bringToFront();
+                                that.info.update(layer.feature.properties);
+                                var popup = L.popup()
+                                    .setLatLng(e.latlng)
+                                    .setContent(that.getSentimentText(e.target.feature.properties.sentimentDensity))
+                                    .openOn(that.map);
                             }
-                            that.info.update(layer.feature.properties);
-                            var popup = L.popup()
-                                .setLatLng(e.latlng)
-                                .setContent(that.getSentimentText(e.target.feature.properties.sentimentDensity))
-                                .openOn(that.map);
-                        }
 
-                        function resetHighlight(e) {
-                            that.shpfile.resetStyle(e.target);
-                            that.info.update();
-                        }
+                            function resetHighlight(e) {
+                                that.shpfile.resetStyle(e.target);
+                                that.info.update();
+                            }
 
-                        that.addLegend();
-                    },
-                    error: function (response) {
-                        $("#error").text("Error: Incorrect request received, please check query again");
-                        $("#viewContent").attr('disabled','true');
-                        this.map.remove();
-                    }
-                });
-            } else {
-                if (this.map !== undefined) {
-                    this.map.remove();
+                            that.addLegend();
+                            $("body").removeClass("loading");
+                        },
+                        error: function (response) {
+                            $("#error").text("Error: Incorrect request received, please check query again");
+                            $("#viewContent").attr('disabled','true');
+                            this.map.remove();
+                            $("body").removeClass("loading");
+                        }
+                    });
                 }
+
+            } else {
                 $("#chartComboBox").val($("#chartComboBox option:first").val());
                 this.openChartView('incomeChart',handleTab.incomeVsSentiment.sort(function (a, b) {
                     return a.x - b.x
@@ -214,13 +215,15 @@ $(function () {
             this.legend = L.control({position: 'bottomright'});
             this.legend.onAdd = function (map) {
                 var div = L.DomUtil.create('div', 'info legend'),
-                    grades = [-1, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1],
+                    range = (that.max - that.min)/5;
+                    grades = [that.min, that.max-(4*range), that.max-(3*range),
+                        that.max-(2*range), that.max-range, that.max],
                     labels = [];
                 // loop through our density intervals and generate a label with a colored square for each interval
                 for (var i = 0; i < grades.length - 1; i++) {
                     div.innerHTML +=
                         '<i style="background:' + that.getColor(grades[i] + 0.01) + ' "></i> ' +
-                        grades[i] + ' - ' + grades[i + 1] + '<br>';
+                        grades[i].toFixed(2) + ' - ' + grades[i + 1].toFixed(2) + '<br>';
                 }
                 return div;
             };
@@ -239,14 +242,14 @@ $(function () {
         getSentimentText: function (sentiment) {
             var d = sentiment;
             if (d !== undefined) {
-                return d > 0.75 ? 'Very happy people ' + "<i class='fa fa-smile popupicon'>" :
-                    d > 0.5 ? 'Happy people ' + "<i class='fa fa-smile popupicon'>" :
-                        d > 0.25 ? "<i class='fa fa-smile popupicon'>" :
-                            d > 0 ? "<i class='fa fa-meh popupicon'>" :
-                                d > -0.25 ? "<i class='fa fa-frown popupicon'>" :
-                                    d > -0.5 ? 'Unhappy people ' + "<i class='fa fa-frown popupicon'>" :
-                                        d > -0.75 ? 'Very unhappy people ' + "<i class='fa fa-frown popupicon'>" :
-                                            'Unknown';
+                var range = (this.max - this.min)/5;
+                this.calculateValues(d,range);
+                return d > this.max-range ? 'Happy people ' + "<i class='fa fa-smile popupicon'>" :
+                    d > this.max-(2*range) ? "<i class='fa fa-smile popupicon'>" :
+                        d > this.max-(3*range) ? "<i class='fa fa-meh popupicon'>" :
+                            d > this.max-(4*range) ? "<i class='fa fa-frown popupicon'>" :
+                                d > this.max-(5*range) ? 'Unhappy people ' + "<i class='fa fa-frown popupicon'>"  :
+                                    'Unknown';
             } else
                 return 'No Sentiment available'
         },
@@ -456,10 +459,3 @@ $(function () {
         }
     });
 });
-
-
-
-
-
-
-

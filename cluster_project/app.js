@@ -14,16 +14,6 @@ var twitterdb = couchdb.db.use('data');
 couchdb.db.list(function (error, body, headers) {
     console.log(body);
 });
-var insta;
-
-// twitterdb.view('raw_data','get_text', function(err, body) {
-//     if (!err) {
-//         console.log(body);
-//         body.rows.forEach(function(doc) {
-//             console.log('Tweet:'+doc.value);
-//         });
-//     }
-// });
 app.get('/getSentiment',function(req,res){
     twitterdb.view('data','get_sentiment',{group:"true"},function(err,body){
         if(!err){
@@ -54,10 +44,6 @@ app.use('/users/list_user',usersRouter);
 app.use(function(req, res, next) {
   next(createError(404));
 });
-
-// app.get('/search',function(req,res){
-//     res.send('hello world');
-// });
 
 // error handler
 app.use(function(err, req, res, next) {
