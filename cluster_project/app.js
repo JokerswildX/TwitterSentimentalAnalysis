@@ -9,7 +9,7 @@ var usersRouter = require('./routes/users');
 var app = express();
 app.use("/public", express.static(__dirname + "/public"));
 
-var couchdb = require('nano')('http://localhost:9000');
+var couchdb = require('nano')('http://localhost:5984');
 var twitterdb = couchdb.db.use('data');
 couchdb.db.list(function (error, body, headers) {
     console.log(body);
