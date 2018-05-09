@@ -9,7 +9,7 @@ var usersRouter = require('./routes/users');
 var app = express();
 app.use("/public", express.static(__dirname + "/public"));
 
-var couchdb = require('nano')('http://localhost:9000');
+var couchdb = require('nano')('http://localhost:5984');
 var twitterdb = couchdb.db.use('data');
 couchdb.db.list(function (error, body, headers) {
     console.log(body);
@@ -29,7 +29,11 @@ app.get('/getSentiment',function(req,res){
         if(!err){
             res.send(body);
         }else{
-            res.send("There was a problem sending the response");
+            var resp = {
+                message:"Error: Failed to get data, Please verify connection with Couch db database",
+                type:"db"
+            };
+            res.send(resp);
         }
     });
 });

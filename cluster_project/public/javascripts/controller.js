@@ -53,6 +53,11 @@ $(function () {
                     url: '/getSentiment',
                     contentType: 'application/json',
                     success: function (response) {
+                        if(response.type !== undefined && response.type==="db"){
+                            $("#error").text(response.message);
+                            $("#viewContent").attr('disabled','true');
+                            return;
+                        }
                         that.response = response;
                         that.incomeVsSentiment = new Array();
                         that.occupationVsSentiment = new Array();
@@ -70,10 +75,6 @@ $(function () {
                                         that.immigrantsVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_tot_p_});
                                         that.homelessPeopleVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_hl_p_h});
                                     }
-
-                                    // sum_Income += feature.properties.tot_tot;
-                                    // count++;
-                                    // that.averageIncome = (sum_Income*1.0)/count;
                                 }
                                 layer.on({
                                     mouseover: highlightFeature,
@@ -96,7 +97,6 @@ $(function () {
                             }
                         });
                         that.shpfile.addTo(that.map);
-                        // that.addMapPoints();
                         that.info.onAdd = function (map) {
                             this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
                             this.update();
@@ -124,7 +124,7 @@ $(function () {
                                     key = k.substring(parseInt(k).toString().length);
                                     feature.properties[key] = feature.properties[k];
                                 }
-                                if (that.keymap[key] !== undefined) {
+                                if (that.keymap[key] !== undefined && (!isNaN(feature.properties[k]) || k === "sa2_name16")) {
                                     displayRequiredData.push(that.keymap[key] + ": " + feature.properties[k]);
                                 }
                                 if (that.keymap[key] === "Number of Immigrants") {
@@ -165,7 +165,9 @@ $(function () {
                         that.addLegend();
                     },
                     error: function (response) {
-                        console.log(response);
+                        $("#error").text("Error: Incorrect request received, please check query again");
+                        $("#viewContent").attr('disabled','true');
+                        this.map.remove();
                     }
                 });
             } else {
@@ -226,16 +228,6 @@ $(function () {
             };
             this.legend.addTo(this.map);
         },
-        // refreshContent: function () {
-        //     var selectedContent = $('.comboBox').val();
-        //     // this.addMapPoints();
-        //     // alert(selectedContent);
-        //     if (selectedContent !== "happiness") {
-        //         this.removeMapPoints();
-        //     } else {
-        //         this.addMapPoints();
-        //     }
-        // },
         getSentimentDensity: function (suburbId) {
             var sentimentDensity;
             this.response.rows.forEach(function (doc) {
@@ -319,9 +311,7 @@ $(function () {
                 }
             }
         },
-
         openChartView: function (chart, data, yAxis, title, interval) {
-
             var chart = new CanvasJS.Chart(chart,
                 {
                     width: 700,
@@ -366,90 +356,6 @@ $(function () {
                         }]
                 });
             chart.render();
-
-
-            // var myChart = new JSChart(chart, 'line');
-            // myChart.setDataArray(data);
-            // myChart.setAxisNameFontSize(10);
-            // myChart.setAxisNameX('Sentiment Values');
-            // myChart.setAxisNameY(yAxis);
-            // myChart.setAxisNameColor('#787878');
-            // myChart.setAxisValuesNumberX(20);
-            // myChart.setAxisValuesNumberY(20);
-            // myChart.setAxisValuesColor('#38a4d9');
-            // myChart.setAxisColor('#38a4d9');
-            // myChart.setLineColor('#C71112');
-            // myChart.setTitle(title);
-            // myChart.setTitleColor('#383838');
-            // myChart.setGraphExtend(true);
-            // myChart.setGridColor('#38a4d9');
-            // myChart.setSize(width, height);
-            // myChart.setAxisPaddingLeft(140);
-            // myChart.setAxisPaddingRight(140);
-            // myChart.setAxisPaddingTop(60);
-            // myChart.setAxisPaddingBottom(45);
-            // myChart.setTextPaddingLeft(105);
-            // myChart.setTextPaddingBottom(12);
-            // myChart.setBackgroundImage('/javascripts/chart_bg.jpg');
-            // myChart.draw();
-
-            // var ctx = document.getElementById("myChart");
-            // var myChart = new Chart(ctx, {
-            //     type: 'line',
-            //     data: {
-            //         labels: [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1],
-            //         datasets: [{
-            //             label: 'Income vs Sentiment Value',
-            //             // xaxisId: [1,2,3,4,5,6,7,8,9,10],
-            //             //     //[-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1],
-            //             // yaxisId: [1,2,3,4,5,6,7,8,9,10],
-            //             data: [
-            //                 {x:0.22,y:1},
-            //                 {x:-0.762,y:2},
-            //                 {x:0.43,y:3},
-            //                 {x:0.964,y:4},
-            //                 {x:-0.53,y:5}
-            //             ],
-            //             // data: [{
-            //             //     x: -10,
-            //             //     y: 0
-            //             // }, {
-            //             //     x: 0,
-            //             //     y: 10
-            //             // }, {
-            //             //     x: 10,
-            //             //     y: 5
-            //             // }],
-            //             pointBackgroundColor: 'blue',
-            //             pointRadius: 3,
-            //             pointHoverBackground: 'darkBlue',
-            //             pointHoverRadius: 4,
-            //             showLine: true,
-            //
-            //
-            //         }]
-            //     },
-            //     options: {
-            //         scales: {
-            //             yAxes: [{
-            //                 ticks: {
-            //                     // min: 1,
-            //                     // max: 9,
-            //                     stepSize: 1
-            //                 }
-            //             }],
-            //             // xAxes: [{
-            //             //     ticks: {
-            //             //         min: 1,
-            //             //         max: 9,
-            //             //         stepSize: 1
-            //             //     }
-            //             // }]
-            //         }
-            //     }
-            //
-            // });
-
         }
     };
 

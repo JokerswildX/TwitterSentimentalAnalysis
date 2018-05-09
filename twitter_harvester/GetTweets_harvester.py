@@ -223,7 +223,7 @@ try:
         except Exception, ex:
             err =  "'%s' '%s' Error '%s' '%s'"%(dbname, str(datetime.now()), str(ex), get_trace())
             print (err)
-            file('errors.txt','a').write(err+'\n')
+            #file('errors.txt','a').write(err+'\n')
         finally:
             print ("disconnecting...")
             streaming_api.disconnect()

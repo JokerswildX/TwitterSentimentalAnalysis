@@ -22,3 +22,17 @@
 - name: install n globally
   npm: name=n global=yes state=latest
 
+- name: "Install forever (program to run Node.js app)."
+  npm: 
+    name: forever
+    global: yes
+    state: present
+
+- name: "Check list of Node.js apps running."
+  command: forever list
+  register: forever_list
+  changed_when: false
+
+- name: "Start Node.js app."
+  command: forever start /home/ubuntu/git_files/cluster_project/app.js
+  when: "forever_list.stdout.find('//home/ubuntu/git_files/cluster_project/app.js') == -1"
