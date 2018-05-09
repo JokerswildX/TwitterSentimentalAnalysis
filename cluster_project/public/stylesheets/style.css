@@ -131,3 +131,8 @@ body {
 #error{
   color:red;
 }
+
+.leaflet-popup-content .popupicon{
+  font-weight:300;
+  font-size: 30px;
+}

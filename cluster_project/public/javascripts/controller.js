@@ -121,13 +121,6 @@ $(function () {
                                 if (that.keymap[key] !== undefined && (!isNaN(feature.properties[k]) || k === "sa2_name16")) {
                                     displayRequiredData.push(that.keymap[key] + ": " + feature.properties[k]);
                                 }
-                                if (that.keymap[key] === "Number of Immigrants") {
-                                    sum_Income += feature.properties[k];
-                                    count++;
-                                    console.log((sum_Income * 1.0) / count);
-                                    console.log(count);
-                                    // console.log(that.averageHomeless);
-                                }
                             });
                             return displayRequiredData;
                         }
@@ -238,9 +231,9 @@ $(function () {
             if (d !== undefined) {
                 return d > 0.75 ? 'Very happy people :) :)' :
                     d > 0.5 ? 'Happy people :)' :
-                        d > 0.25 ? "<i class='fa fa-smile'>" :
-                            d > 0 ? "<i class='fa fa-meh'>" :
-                                d > -0.25 ? "<i class='fa fa-frown'>" :
+                        d > 0.25 ? "<i class='fa fa-smile popupicon'>" :
+                            d > 0 ? "<i class='fa fa-meh popupicon'>" :
+                                d > -0.25 ? "<i class='fa fa-frown popupicon'>" :
                                     d > -0.5 ? 'Unhappy people :(' :
                                         d > -0.75 ? 'Very unhappy people :( :(' :
                                             'unknown';
@@ -254,17 +247,21 @@ $(function () {
             this.occupationSuburbMarkers = [];
             this.immigrantSuburbMarkers = [];
             this.map.eachLayer(function (layer) {
-                if (layer.feature && layer.feature.properties.tot_tot > (avgIncome * 2.0)) {
-                    that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.incomeMarker}));
+                if (layer.feature && layer.feature.properties.tot_tot > (avgIncome * 1.9)) {
+                    that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng],
+                        {icon: that.incomeMarker}).bindPopup("Avg weekly Income:"+layer.feature.properties.tot_tot));
                 }
                 if (layer.feature && layer.feature.properties.M0_hl_p_h > (that.averageHomeless * 2.0)) {
-                    that.homelessSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.homelessMarker}));
+                    that.homelessSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng],
+                        {icon: that.homelessMarker}).bindPopup("Number of Homeless people:"+ layer.feature.properties.M0_hl_p_h));
                 }
                 if (layer.feature && layer.feature.properties.M0_p_tot > (that.averageOccupation * 2.0)) {
-                    that.occupationSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.occupationMarker}));
+                    that.occupationSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng],
+                        {icon: that.occupationMarker}).bindPopup("Number of Occupation:"+ layer.feature.properties.M0_p_tot));
                 }
                 if (layer.feature && layer.feature.properties.M0_tot_p_ > (that.averageImmigrants * 2.0)) {
-                    that.immigrantSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng], {icon: that.immigrantMarker}));
+                    that.immigrantSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng],
+                        {icon: that.immigrantMarker}).bindPopup("Number of Immigrants:"+ layer.feature.properties.M0_tot_p));
                 }
             });
             this.richSuburbMarkerLayerGroup = L.layerGroup(this.richSuburbMarkers);
