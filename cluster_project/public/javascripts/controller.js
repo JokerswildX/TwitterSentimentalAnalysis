@@ -255,7 +255,7 @@ $(function () {
                     that.richSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng],
                         {icon: that.incomeMarker}).bindPopup("Avg weekly Income:"+layer.feature.properties.tot_tot));
                 }
-                if (layer.feature && layer.feature.properties.M0_hl_p_h > (that.averageHomeless * 2.0)) {
+                if (layer.feature && layer.feature.properties.M0_hl_p_h > (that.averageHomeless * 3.5)) {
                     that.homelessSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng],
                         {icon: that.homelessMarker}).bindPopup("Number of Homeless people:"+ layer.feature.properties.M0_hl_p_h));
                 }
