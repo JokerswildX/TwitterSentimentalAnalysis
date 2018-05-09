@@ -55,6 +55,7 @@ $(function () {
                     success: function (response) {
                         if(response.type !== undefined && response.type==="db"){
                             $("#error").text(response.message);
+                            $("#viewContent").attr('disabled','true');
                             return;
                         }
                         that.response = response;
@@ -159,6 +160,7 @@ $(function () {
                     },
                     error: function (response) {
                         $("#error").text("Error: Incorrect request received, please check query again");
+                        $("#viewContent").attr('disabled','true');
                         this.map.remove();
                     }
                 });
