@@ -18,6 +18,8 @@ $(function () {
                     "sa2_name16": "Suburb"
                 };
                 var that = this;
+                this.min = 0;
+                this.max = 0;
                 this.shpfile;
                 this.map = this.openMapView();
                 $('#chartbutton').removeClass('active');
@@ -64,6 +66,8 @@ $(function () {
                         that.immigrantsVsSentiment = new Array();
                         that.homelessPeopleVsSentiment = new Array();
                         that.info = L.control();
+
+                        that.calculateAndFindMinMaxRange(response);
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
                             onEachFeature: function (feature, layer) {
                                 if (feature.properties) {
@@ -197,14 +201,12 @@ $(function () {
             return mymap;
         },
         getColor: function (d) {
-            return d > 0.75 ? '#587D0B' :
-                d > 0.5 ? '#4EB60B' :
-                    d > 0.1 ? '#82BE0A' :
-                        d > 0 ? '#BAC608' :
-                            d > -0.25 ? '#CEA306' :
-                                d > -0.5 ? '#D67004' :
-                                    d > -0.75 ? '#DE3602' :
-                                        d > -1 ?'#E60008' :
+            var range = (this.max - this.min)/5;
+            return d > this.max-range ? '#05C804' :
+                d > this.max-(2*range) ? '#71D503' :
+                    d > this.max-(3*range) ? '#E3DB02' :
+                        d > this.max-(4*range) ? '#F06D01' :
+                            d > this.max-(5*range) ? '#FE0010' :
                                             '#A9A9A9';
         },
         addLegend: function () {
@@ -226,9 +228,10 @@ $(function () {
         },
         getSentimentDensity: function (suburbId) {
             var sentimentDensity;
+            var that = this;
             this.response.rows.forEach(function (doc) {
                 if (doc.key == suburbId) {
-                    sentimentDensity = doc.value.total / doc.value.count;
+                    sentimentDensity = doc.sentimentData;
                 }
             });
             return sentimentDensity;
@@ -357,6 +360,19 @@ $(function () {
                         }]
                 });
             chart.render();
+        },
+        calculateAndFindMinMaxRange: function(twitterData) {
+            var that = this;
+            twitterData.rows.forEach(function (doc) {
+                doc.sentimentData = doc.value.total / doc.value.count;
+                if(doc.sentimentData < that.min){
+                    that.min = doc.sentimentData;
+                }else{
+                    if(doc.sentimentData > that.max){
+                        that.max = doc.sentimentData;
+                    }
+                }
+            });
         }
     };
 
