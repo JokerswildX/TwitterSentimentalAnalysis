@@ -34,5 +34,16 @@ block content
           div#mapView.tabcontent(style="display:block;")
             div#mapid
           div#chartAnalysisView.tabcontent
-            div#chartId
-              //canvas#myChart
+            div.form-group
+              label#dropDownLabel.control-label Select one of the option to view the distribution in chart view:
+              div.controls.col-sm-6
+                select#chartComboBox.form-control
+                  option(value="incomeVsSentiment") Income of people Vs Sentiments
+                  option(value="employmentVsSentiment") Number of Employed people Vs Sentiments
+                  option(value="immigrantsVsSentiment") Number of Immigrants Vs Sentiments
+                  option(value="homelessPeopleVsSentiment") Number of homeless people Vs Sentiments
+            div#chartView
+              div#incomeChart
+              div#occupationChart
+              div#immigrantChart
+              div#homelessPeopleChart

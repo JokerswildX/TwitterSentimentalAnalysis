@@ -55,6 +55,9 @@ $(function () {
                     success: function (response) {
                         that.response = response;
                         that.incomeVsSentiment = new Array();
+                        that.occupationVsSentiment = new Array();
+                        that.immigrantsVsSentiment = new Array();
+                        that.homelessPeopleVsSentiment = new Array();
                         that.info = L.control();
                         that.shpfile = new L.Shapefile('public/javascripts/vic_shapefile.zip', {
                             onEachFeature: function (feature, layer) {
@@ -62,7 +65,10 @@ $(function () {
                                     var suburbmapdata = getInfoFrom(Object, feature).join(" <br/>");
                                     layer.bindPopup(suburbmapdata);
                                     if (feature.properties.sentimentDensity) {
-                                        that.incomeVsSentiment.push([feature.properties.sentimentDensity, feature.properties.tot_tot]);
+                                        that.incomeVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.tot_tot});
+                                        that.occupationVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_p_tot});
+                                        that.immigrantsVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_tot_p_});
+                                        that.homelessPeopleVsSentiment.push({x:feature.properties.sentimentDensity, y:feature.properties.M0_hl_p_h});
                                     }
 
                                     // sum_Income += feature.properties.tot_tot;
@@ -166,8 +172,14 @@ $(function () {
                 if (this.map !== undefined) {
                     this.map.remove();
                 }
+                this.openChartView('incomeChart',handleTab.incomeVsSentiment.sort(function (a, b) {
+                    return a.x - b.x
+                }), 'Total Income of people', 'Income of people Vs Sentiments', 300);
 
-                this.openChartView();
+                $('#homelessPeopleChart').hide();
+                $('#immigrantChart').hide();
+                $('#occupationChart').hide();
+                $('#incomeChart').show();
                 $('#mapbutton').removeClass('active');
                 $('#chartbutton').addClass('active');
             }
@@ -214,16 +226,16 @@ $(function () {
             };
             this.legend.addTo(this.map);
         },
-        refreshContent: function () {
-            var selectedContent = $('.comboBox').val();
-            // this.addMapPoints();
-            // alert(selectedContent);
-            if (selectedContent !== "happiness") {
-                this.removeMapPoints();
-            } else {
-                this.addMapPoints();
-            }
-        },
+        // refreshContent: function () {
+        //     var selectedContent = $('.comboBox').val();
+        //     // this.addMapPoints();
+        //     // alert(selectedContent);
+        //     if (selectedContent !== "happiness") {
+        //         this.removeMapPoints();
+        //     } else {
+        //         this.addMapPoints();
+        //     }
+        // },
         getSentimentDensity: function (suburbId) {
             var sentimentDensity;
             this.response.rows.forEach(function (doc) {
@@ -307,34 +319,79 @@ $(function () {
                 }
             }
         },
-        openChartView: function () {
-            var myData = this.incomeVsSentiment.sort(function (a, b) {
-                return a[0] - b[0]
-            });
-            var myChart = new JSChart('chartId', 'line');
-            myChart.setDataArray(myData);
-            myChart.setAxisNameFontSize(10);
-            myChart.setAxisNameX('Sentiment Values');
-            myChart.setAxisNameY('Total Income');
-            myChart.setAxisNameColor('#787878');
-            myChart.setAxisValuesNumberX(20);
-            myChart.setAxisValuesNumberY(20);
-            myChart.setAxisValuesColor('#38a4d9');
-            myChart.setAxisColor('#38a4d9');
-            myChart.setLineColor('#C71112');
-            myChart.setTitle('Income VS Sentiment chart');
-            myChart.setTitleColor('#383838');
-            myChart.setGraphExtend(true);
-            myChart.setGridColor('#38a4d9');
-            myChart.setSize(800, 500);
-            myChart.setAxisPaddingLeft(140);
-            myChart.setAxisPaddingRight(140);
-            myChart.setAxisPaddingTop(60);
-            myChart.setAxisPaddingBottom(45);
-            myChart.setTextPaddingLeft(105);
-            myChart.setTextPaddingBottom(12);
-            myChart.setBackgroundImage('/javascripts/chart_bg.jpg');
-            myChart.draw();
+
+        openChartView: function (chart, data, yAxis, title, interval) {
+
+            var chart = new CanvasJS.Chart(chart,
+                {
+                    width: 700,
+                    title:{
+                        text: title,
+                        fontWeight: "bolder",
+                        fontColor: "black",
+                        fontfamily: "Lucida Grande",
+                        fontSize: 25
+                    },
+                    axisX: {
+                        title: "Sentiment Density",
+                        titleFontWeight: "normal",
+                        titleFontColor: "black",
+                        titleFontfamily: "Lucida Grande",
+                        titleFontSize: 16,
+                        fontSize: 14,
+                        interval:0.1,
+                        labelFontFamily: "Lucida Grande",
+                        labelFontColor: "black",
+                        labelFontSize: 10,
+                        labelFontWeight: "normal",
+                        intervalType: "number"
+                    },
+                    axisY:{
+                        title: yAxis,
+                        titleFontWeight: "normal",
+                        titleFontColor: "black",
+                        titleFontfamily: "Lucida Grande",
+                        titleFontSize: 16,
+                        includeZero: true,
+                        interval: interval,
+                        intervalType: "number",
+                        labelFontFamily: "Lucida Grande",
+                        labelFontColor: "black",
+                        labelFontSize: 10,
+                        labelFontWeight: "normal"
+                    },
+                    data: [{
+                            type: "line",
+                            dataPoints: data
+                        }]
+                });
+            chart.render();
+
+
+            // var myChart = new JSChart(chart, 'line');
+            // myChart.setDataArray(data);
+            // myChart.setAxisNameFontSize(10);
+            // myChart.setAxisNameX('Sentiment Values');
+            // myChart.setAxisNameY(yAxis);
+            // myChart.setAxisNameColor('#787878');
+            // myChart.setAxisValuesNumberX(20);
+            // myChart.setAxisValuesNumberY(20);
+            // myChart.setAxisValuesColor('#38a4d9');
+            // myChart.setAxisColor('#38a4d9');
+            // myChart.setLineColor('#C71112');
+            // myChart.setTitle(title);
+            // myChart.setTitleColor('#383838');
+            // myChart.setGraphExtend(true);
+            // myChart.setGridColor('#38a4d9');
+            // myChart.setSize(width, height);
+            // myChart.setAxisPaddingLeft(140);
+            // myChart.setAxisPaddingRight(140);
+            // myChart.setAxisPaddingTop(60);
+            // myChart.setAxisPaddingBottom(45);
+            // myChart.setTextPaddingLeft(105);
+            // myChart.setTextPaddingBottom(12);
+            // myChart.setBackgroundImage('/javascripts/chart_bg.jpg');
+            // myChart.draw();
 
             // var ctx = document.getElementById("myChart");
             // var myChart = new Chart(ctx, {
@@ -432,6 +489,47 @@ $(function () {
             handleTab.handleLayers("mostHomeless","remove");
         }else{
             handleTab.handleLayers("mostHomeless","add");
+        }
+    });
+    $('#chartComboBox').change(function () {
+        switch(this.value) {
+            case 'incomeVsSentiment':
+                handleTab.openChartView('incomeChart',handleTab.incomeVsSentiment.sort(function (a, b) {
+                    return a.x - b.x
+                }), 'Total Income of people', 'Income of people Vs Sentiments', 300);
+
+                $('#homelessPeopleChart').hide();
+                $('#immigrantChart').hide();
+                $('#occupationChart').hide();
+                $('#incomeChart').show();
+                break;
+            case 'employmentVsSentiment':
+                handleTab.openChartView('occupationChart',handleTab.occupationVsSentiment.sort(function (a, b) {
+                    return a.x - b.x
+                }), 'Number of Employed people', 'Number of Employed people Vs Sentiments', 2000);
+                $('#incomeChart').hide();
+                $('#homelessPeopleChart').hide();
+                $('#immigrantChart').hide();
+                $('#occupationChart').show();
+                break;
+            case 'immigrantsVsSentiment':
+                handleTab.openChartView('immigrantChart',handleTab.immigrantsVsSentiment.sort(function (a, b) {
+                    return a.x - b.x
+                }), 'Number of Immigrants', 'Number of Immigrants Vs Sentiments', 5000);
+                $('#incomeChart').hide();
+                $('#occupationChart').hide();
+                $('#homelessPeopleChart').hide();
+                $('#immigrantChart').show();
+                break;
+            case 'homelessPeopleVsSentiment':
+                handleTab.openChartView('homelessPeopleChart',handleTab.homelessPeopleVsSentiment.sort(function (a, b) {
+                    return a.x - b.x
+                }), 'Number of homeless people', 'Number of homeless people Vs Sentiments');
+                $('#incomeChart').hide();
+                $('#occupationChart').hide();
+                $('#immigrantChart').hide();
+                $('#homelessPeopleChart').show();
+                break;
         }
     });
 });
