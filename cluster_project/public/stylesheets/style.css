@@ -3,7 +3,12 @@ body {
 }
 
 .sidebar {
-  grid-area: sidebar;
+  width: 20%;
+  float: left;
+}
+
+#chartComboBox {
+  width: 40%;
 }
 
 #dropDownLabel {
@@ -31,7 +36,7 @@ body {
   grid-template-columns: 250px auto;
   grid-template-areas:
           "header  header"
-          "sidebar content";
+          "content content";
   height: 100vh;
   background-color: #2196F3;
   padding: 2px;
@@ -100,6 +105,7 @@ body {
 
 #mapid{
   height: 84vh;
+  margin-left: 20%;
 }
 
 #chartView {

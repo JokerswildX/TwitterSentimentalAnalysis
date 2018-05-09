@@ -199,7 +199,7 @@ $(function () {
         getColor: function (d) {
             return d > 0.75 ? '#587D0B' :
                 d > 0.5 ? '#4EB60B' :
-                    d > 0.25 ? '#82BE0A' :
+                    d > 0.1 ? '#82BE0A' :
                         d > 0 ? '#BAC608' :
                             d > -0.25 ? '#CEA306' :
                                 d > -0.5 ? '#D67004' :

@@ -3,29 +3,6 @@ extends layout
 block content
   div.wrapper
     div.box.header Welcome to Twitter Sentiment Analysis
-    div.box.sidebar
-      div.sidebarContainer
-        div Select one of the option to view the distribution in map view:
-        div.buttonDiv
-          button#viewContent.btn-primary(type="button") Calculate Map Markers!
-        div.control-group
-          div.col-sm-2.controls
-            input#richSuburb(type='checkbox' name='richSuburbs' disabled)
-          label.col-sm-10.control-label Display rich suburbs
-        div.control-group
-          div.col-sm-2.controls
-            input#mostOccupations(type='checkbox' name='suburbOccupation' disabled)
-          label.col-sm-10.control-label Display suburbs with more occupation
-        div.control-group
-          div.col-sm-2.controls
-            input#mostImmigrants(type='checkbox' name='suburbImmigrants' disabled)
-          label.col-sm-10.control-label Display suburbs with many immigrants
-        div.control-group
-          div.col-sm-2.controls
-            input#mostHomeless(type='checkbox' name='suburbHomeless' disabled)
-          label.col-sm-10.control-label Display suburbs with many homeless people
-        div.control-group
-          div#error.col-sm2.controls
     div.box.content
       div.panel
         div.panel-header
@@ -34,11 +11,34 @@ block content
             button#chartbutton(class="tablinks" data-val="chartAnalysisView") Chart Analysis View
         div.panel-body
           div#mapView.tabcontent(style="display:block;")
+            div.box.sidebar
+              div.sidebarContainer
+                div Select one of the option to view the distribution in map view:
+                div.buttonDiv
+                  button#viewContent.btn-primary(type="button") Calculate Map Markers!
+                div.control-group
+                  div.col-sm-2.controls
+                    input#richSuburb(type='checkbox' name='richSuburbs' disabled)
+                  label.col-sm-10.control-label Display rich suburbs
+                div.control-group
+                  div.col-sm-2.controls
+                    input#mostOccupations(type='checkbox' name='suburbOccupation' disabled)
+                  label.col-sm-10.control-label Display suburbs with more occupation
+                div.control-group
+                  div.col-sm-2.controls
+                    input#mostImmigrants(type='checkbox' name='suburbImmigrants' disabled)
+                  label.col-sm-10.control-label Display suburbs with many immigrants
+                div.control-group
+                  div.col-sm-2.controls
+                    input#mostHomeless(type='checkbox' name='suburbHomeless' disabled)
+                  label.col-sm-10.control-label Display suburbs with many homeless people
+                div.control-group
+                  div#error.col-sm2.controls
             div#mapid
           div#chartAnalysisView.tabcontent
             div.form-group
-              label#dropDownLabel.control-label Select one of the option to view the distribution in chart view:
-              div.controls.col-sm-6
+              label#dropDownLabel Select one of the option to view the distribution in chart view:
+              div.controls
                 select#chartComboBox.form-control
                   option(value="incomeVsSentiment") Income of people Vs Sentiments
                   option(value="employmentVsSentiment") Number of Employed people Vs Sentiments
