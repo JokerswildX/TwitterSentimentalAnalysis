@@ -53,6 +53,10 @@ $(function () {
                     url: '/getSentiment',
                     contentType: 'application/json',
                     success: function (response) {
+                        if(response.type !== undefined && response.type==="db"){
+                            $("#error").text(response.message);
+                            return;
+                        }
                         that.response = response;
                         that.incomeVsSentiment = new Array();
                         that.info = L.control();
@@ -64,10 +68,6 @@ $(function () {
                                     if (feature.properties.sentimentDensity) {
                                         that.incomeVsSentiment.push([feature.properties.sentimentDensity, feature.properties.tot_tot]);
                                     }
-
-                                    // sum_Income += feature.properties.tot_tot;
-                                    // count++;
-                                    // that.averageIncome = (sum_Income*1.0)/count;
                                 }
                                 layer.on({
                                     mouseover: highlightFeature,
@@ -90,7 +90,6 @@ $(function () {
                             }
                         });
                         that.shpfile.addTo(that.map);
-                        // that.addMapPoints();
                         that.info.onAdd = function (map) {
                             this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
                             this.update();
@@ -118,7 +117,7 @@ $(function () {
                                     key = k.substring(parseInt(k).toString().length);
                                     feature.properties[key] = feature.properties[k];
                                 }
-                                if (that.keymap[key] !== undefined) {
+                                if (that.keymap[key] !== undefined && (!isNaN(feature.properties[k]) || k === "sa2_name16")) {
                                     displayRequiredData.push(that.keymap[key] + ": " + feature.properties[k]);
                                 }
                                 if (that.keymap[key] === "Number of Immigrants") {
@@ -159,7 +158,8 @@ $(function () {
                         that.addLegend();
                     },
                     error: function (response) {
-                        console.log(response);
+                        $("#error").text("Error: Incorrect request received, please check query again");
+                        this.map.remove();
                     }
                 });
             } else {
@@ -216,8 +216,6 @@ $(function () {
         },
         refreshContent: function () {
             var selectedContent = $('.comboBox').val();
-            // this.addMapPoints();
-            // alert(selectedContent);
             if (selectedContent !== "happiness") {
                 this.removeMapPoints();
             } else {
