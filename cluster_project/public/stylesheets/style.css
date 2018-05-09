@@ -114,7 +114,12 @@ body {
 }
 
 #chartView {
-  padding: 30px;
+  margin-left: 25%;
+  margin-right: 25%;
+}
+
+.form-group {
+  padding: 0 10px 10px 10px;
 }
 
 .legend {

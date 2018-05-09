@@ -243,7 +243,6 @@ $(function () {
             var d = sentiment;
             if (d !== undefined) {
                 var range = (this.max - this.min)/5;
-                this.calculateValues(d,range);
                 return d > this.max-range ? 'Happy people ' + "<i class='fa fa-smile popupicon'>" :
                     d > this.max-(2*range) ? "<i class='fa fa-smile popupicon'>" :
                         d > this.max-(3*range) ? "<i class='fa fa-meh popupicon'>" :
@@ -321,7 +320,7 @@ $(function () {
         openChartView: function (chart, data, yAxis, title, interval) {
             var chart = new CanvasJS.Chart(chart,
                 {
-                    width: 700,
+                    width: 650,
                     title:{
                         text: title,
                         fontWeight: "bolder",
