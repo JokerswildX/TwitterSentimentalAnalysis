@@ -1,5 +1,5 @@
 {
-  "_id" : "_design/example",
+  "_id" : "_design/data",
   "views" : {
     "get_sentiment" : {
       "map" : "function(doc){ emit(doc.properties.sa2_main16, doc.sentiment)}",

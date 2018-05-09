@@ -1,11 +1,4 @@
 
-- name: install front-end dependencies
-  apt:  
-    name: couchdb
-    state: latest
-    update_cache: yes
-  with_items:
-    - couchdb
 
 - name: add couchdb repository to apt
   shell: 'echo "deb https://apache.bintray.com/couchdb-deb xenial main" | sudo tee -a /etc/apt/sources.list'
@@ -14,6 +7,14 @@
   shell: 'curl -L https://couchdb.apache.org/repo/bintray-pubkey.asc | sudo apt-key add -'
   args: 
     warn: false
+
+- name: install front-end dependencies
+  apt:
+    name: couchdb
+    state: latest
+    update_cache: yes
+  with_items:
+    - couchdb
 
 - name: start couchdb service
   service: 
@@ -32,7 +33,7 @@
 
 - name: create couchdb views
   uri:
-    url: 'http://127.0.0.1:5984/{{db_name}}/_design/{{view_name}}'
+    url: 'http://127.0.0.1:5984/{{db_name}}/_design/{{db_name}}'
     method: PUT
     status_code: 201, 409
     return_content: yes
