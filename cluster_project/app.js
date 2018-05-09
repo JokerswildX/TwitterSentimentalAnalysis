@@ -29,7 +29,11 @@ app.get('/getSentiment',function(req,res){
         if(!err){
             res.send(body);
         }else{
-            res.send("There was a problem sending the response");
+            var resp = {
+                message:"Error: Failed to get data, Please verify connection with Couch db database",
+                type:"db"
+            };
+            res.send(resp);
         }
     });
 });

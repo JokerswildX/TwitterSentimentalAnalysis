@@ -6,14 +6,26 @@ block content
     div.box.sidebar
       div.sidebarContainer
         div Select one of the option to view the distribution in map view:
-        div.comboBoxDiv
-          select.comboBox
-            option(value="happiness") Happiness
-            option(value="sad") Sad
-            option(value="worried") Worried
-            option(value="notSatisfied") Not Satisfied
         div.buttonDiv
-          button#viewContent(type="button") Let's view it!
+          button#viewContent.btn-primary(type="button") Calculate Map Markers!
+        div.control-group
+          div.col-sm-2.controls
+            input#richSuburb(type='checkbox' name='richSuburbs' disabled)
+          label.col-sm-10.control-label Display rich suburbs
+        div.control-group
+          div.col-sm-2.controls
+            input#mostOccupations(type='checkbox' name='suburbOccupation' disabled)
+          label.col-sm-10.control-label Display suburbs with more occupation
+        div.control-group
+          div.col-sm-2.controls
+            input#mostImmigrants(type='checkbox' name='suburbImmigrants' disabled)
+          label.col-sm-10.control-label Display suburbs with many immigrants
+        div.control-group
+          div.col-sm-2.controls
+            input#mostHomeless(type='checkbox' name='suburbHomeless' disabled)
+          label.col-sm-10.control-label Display suburbs with many homeless people
+        div.control-group
+          div#error.col-sm2.controls
     div.box.content
       div.panel
         div.panel-header
@@ -24,6 +36,5 @@ block content
           div#mapView.tabcontent(style="display:block;")
             div#mapid
           div#chartAnalysisView.tabcontent
-            h3 Chart Analysis View
-            p Add chart analysis content here.
-
+            div#chartId
+              //canvas#myChart
