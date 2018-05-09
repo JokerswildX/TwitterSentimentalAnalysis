@@ -123,9 +123,10 @@ $(function () {
                                 } else {
                                     key = k.substring(parseInt(k).toString().length);
                                     feature.properties[key] = feature.properties[k];
+                                    delete k;
                                 }
-                                if (that.keymap[key] !== undefined && (!isNaN(feature.properties[k]) || k === "sa2_name16")) {
-                                    displayRequiredData.push(that.keymap[key] + ": " + feature.properties[k]);
+                                if (that.keymap[key] !== undefined && (!isNaN(feature.properties[key]) || key === "sa2_name16")) {
+                                    displayRequiredData.push(that.keymap[key] + ": " + feature.properties[key]);
                                 }
                             });
                             return displayRequiredData;
@@ -167,6 +168,7 @@ $(function () {
                 if (this.map !== undefined) {
                     this.map.remove();
                 }
+                $("#chartComboBox").val($("#chartComboBox option:first").val());
                 this.openChartView('incomeChart',handleTab.incomeVsSentiment.sort(function (a, b) {
                     return a.x - b.x
                 }), 'Total Income of people', 'Income of people Vs Sentiments', 300);
@@ -202,7 +204,8 @@ $(function () {
                             d > -0.25 ? '#CEA306' :
                                 d > -0.5 ? '#D67004' :
                                     d > -0.75 ? '#DE3602' :
-                                        '#E60008';
+                                        d > -1 ?'#E60008' :
+                                            '#A9A9A9';
         },
         addLegend: function () {
             var that = this;
@@ -233,15 +236,16 @@ $(function () {
         getSentimentText: function (sentiment) {
             var d = sentiment;
             if (d !== undefined) {
-                return d > 0.75 ? 'Very happy people :) :)' :
-                    d > 0.5 ? 'Happy people :)' :
+                return d > 0.75 ? 'Very happy people ' + "<i class='fa fa-smile popupicon'>" :
+                    d > 0.5 ? 'Happy people ' + "<i class='fa fa-smile popupicon'>" :
                         d > 0.25 ? "<i class='fa fa-smile popupicon'>" :
                             d > 0 ? "<i class='fa fa-meh popupicon'>" :
                                 d > -0.25 ? "<i class='fa fa-frown popupicon'>" :
-                                    d > -0.5 ? 'Unhappy people :(' :
-                                        d > -0.75 ? 'Very unhappy people :( :(' :
-                                            'unknown';
-            }
+                                    d > -0.5 ? 'Unhappy people ' + "<i class='fa fa-frown popupicon'>" :
+                                        d > -0.75 ? 'Very unhappy people ' + "<i class='fa fa-frown popupicon'>" :
+                                            'Unknown';
+            } else
+                return 'No Sentiment available'
         },
         addMapPoints: function () {
             var that = this;
@@ -399,7 +403,7 @@ $(function () {
             case 'incomeVsSentiment':
                 handleTab.openChartView('incomeChart',handleTab.incomeVsSentiment.sort(function (a, b) {
                     return a.x - b.x
-                }), 'Total Income of people', 'Income of people Vs Sentiments', 300);
+                }), 'Total Income of people (Weeks)', 'Income of people Vs Sentiments', 300);
 
                 $('#homelessPeopleChart').hide();
                 $('#immigrantChart').hide();
