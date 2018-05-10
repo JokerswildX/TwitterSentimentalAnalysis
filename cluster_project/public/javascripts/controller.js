@@ -274,7 +274,7 @@ $(function () {
                 }
                 if (layer.feature && layer.feature.properties.M0_tot_p_ > (that.averageImmigrants * 2.0)) {
                     that.immigrantSuburbMarkers.push(L.marker([layer._latlngs[0][0].lat, layer._latlngs[0][0].lng],
-                        {icon: that.immigrantMarker}).bindPopup("Number of Immigrants:"+ layer.feature.properties.M0_tot_p));
+                        {icon: that.immigrantMarker}).bindPopup("Number of Immigrants:"+ layer.feature.properties.M0_tot_p_));
                 }
             });
             this.richSuburbMarkerLayerGroup = L.layerGroup(this.richSuburbMarkers);
