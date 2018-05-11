@@ -17,8 +17,6 @@ $(function () {
                     "sa2_name16": "Suburb"
                 };
                 var that = this;
-                this.min = 0;
-                this.max = 0;
                 this.shpfile;
                 this.map = this.response == undefined ? this.openMapView() : this.map;
                 $('#chartbutton').removeClass('active');
@@ -365,16 +363,20 @@ $(function () {
         },
         calculateAndFindMinMaxRange: function(twitterData) {
             var that = this;
+            var min = 0;
+            var max = 0;
             twitterData.rows.forEach(function (doc) {
                 doc.sentimentData = doc.value.total / doc.value.count;
-                if(doc.sentimentData < that.min){
-                    that.min = doc.sentimentData;
+                if(doc.sentimentData < min){
+                    min = doc.sentimentData;
                 }else{
-                    if(doc.sentimentData > that.max){
-                        that.max = doc.sentimentData;
+                    if(doc.sentimentData > max){
+                        max = doc.sentimentData;
                     }
                 }
             });
+            that.min = min;
+            that.max = max;
         }
     };
 
